@@ -24,8 +24,6 @@ Smart Canteen Optimizer is a web-based system designed to reduce long queues and
 
 ### Prerequisites
 
-Make sure the following are installed on your machine:
-
 - [Node.js](https://nodejs.org/) v18 or higher
 - npm v9 or higher
 
@@ -148,17 +146,6 @@ smart-canteen-optimizer/
 
 ---
 
-## 👥 Team Roles
-
-| Role | Responsibility |
-|---|---|
-| Frontend Developer | UI and user flows |
-| Backend Developer | Server, database, and APIs |
-| Data / Analytics | Predictions and insights |
-| UX & Integration Lead | Notifications, testing, and smooth experience |
-
----
-
 ## 📊 Success Metrics
 
 - Reduced student wait time
@@ -170,7 +157,9 @@ smart-canteen-optimizer/
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request.
+NitinKumar10224
+RITAMDAS556
+anokhi7
 
 ---
 
