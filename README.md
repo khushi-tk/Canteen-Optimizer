@@ -157,9 +157,10 @@ smart-canteen-optimizer/
 
 ## 🤝 Contributing
 
-NitinKumar10224
-RITAMDAS556
-anokhi7
+- NitinKumar10224
+- RITAMDAS556
+- anokhi7
+- khushi-tk
 
 ---
 
