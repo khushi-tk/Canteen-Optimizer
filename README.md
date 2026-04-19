@@ -90,21 +90,6 @@ The server will run at `http://localhost:3000`.
 
 ---
 
-### 4. Environment Variables
-
-Create a `.env` file in `/backend`:
-
-```env
-PORT=3000
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY=your-private-key
-FIREBASE_CLIENT_EMAIL=your-client-email
-```
-
-> ⚠️ Never commit `.env` to version control. It is listed in `.gitignore`.
-
----
-
 ## 📁 Project Structure
 
 ```
