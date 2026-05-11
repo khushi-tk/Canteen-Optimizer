@@ -39,42 +39,44 @@ interface CardProps {
 function MenuItemCard({ item, qty, onAdd, onUpdateQty }: CardProps) {
   return (
     <div
-      className={`relative flex flex-col rounded-2xl bg-white p-3 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 ${
+      className={`relative flex flex-col rounded-xl bg-white p-3 border border-slate-100 shadow-sm transition-all duration-200 ${
         item.available
-          ? 'hover:-translate-y-0.5 hover:shadow-md'
+          ? 'hover:-translate-y-0.5 hover:shadow-md hover:border-slate-200'
           : 'opacity-50 pointer-events-none'
       }`}
     >
       {/* Unavailable overlay */}
       {!item.available && (
-        <span className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 text-[10px] font-bold text-slate-500">
+        <span className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-white/70 text-xs font-semibold text-slate-500 backdrop-blur-[1px]">
           Currently unavailable
         </span>
       )}
 
       {/* Top row: emoji + badge */}
-      <div className="flex items-start justify-between mb-1.5">
-        <span className="text-[32px] leading-none">{item.emoji}</span>
+      <div className="flex items-start justify-between mb-2">
+        <span className="text-[28px] leading-none select-none">{item.emoji}</span>
         <DietaryBadge tag={item.dietaryTag} />
       </div>
 
       {/* Name + description */}
-      <h3 className="text-sm font-extrabold text-slate-800 leading-tight">
+      <h3 className="text-sm font-semibold text-slate-900 leading-tight">
         {item.name}
       </h3>
-      <p className="line-clamp-2 mt-0.5 text-[11px] leading-snug text-slate-400">
+      <p className="line-clamp-2 mt-0.5 text-xs leading-relaxed text-slate-500">
         {item.description}
       </p>
 
       {/* Prep time */}
-      <div className="mt-1.5 flex items-center gap-1 text-[10px] text-slate-400">
-        <span>🕐</span>
-        <span className="font-semibold">~{item.prepTimeMinutes}m prep</span>
+      <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
+        <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span className="font-medium">~{item.prepTimeMinutes} min</span>
       </div>
 
       {/* Price + Add / Stepper */}
-      <div className="mt-auto flex items-center justify-between pt-2">
-        <span className="text-base font-black text-slate-800">
+      <div className="mt-auto flex items-center justify-between pt-3">
+        <span className="text-base font-bold text-slate-900">
           ₹{item.price}
         </span>
 
@@ -82,26 +84,26 @@ function MenuItemCard({ item, qty, onAdd, onUpdateQty }: CardProps) {
           <button
             onClick={onAdd}
             aria-label={`Add ${item.name} to cart`}
-            className="flex items-center gap-1 rounded-xl bg-brand-500 px-3 py-1.5 text-xs font-bold text-white shadow-[0_8px_24px_rgba(249,115,22,0.35)] transition-all duration-150 hover:bg-brand-600 active:scale-95"
+            className="flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 hover:bg-indigo-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
           >
-            <span className="text-sm">+</span> Add
+            <span className="text-sm leading-none">+</span> Add
           </button>
         ) : (
           <div className="flex items-center gap-2">
             <button
               onClick={() => onUpdateQty(-1)}
               aria-label={`Decrease ${item.name} quantity`}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-100 text-brand-600 font-bold transition-all duration-150 active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-slate-600 font-semibold transition-all duration-150 hover:bg-slate-200 active:scale-95"
             >
               −
             </button>
-            <span className="w-5 text-center text-sm font-black text-slate-800">
+            <span className="w-5 text-center text-sm font-bold text-slate-900 tabular-nums">
               {qty}
             </span>
             <button
               onClick={() => onUpdateQty(1)}
               aria-label={`Increase ${item.name} quantity`}
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-500 text-white font-bold transition-all duration-150 active:scale-95"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-white font-semibold transition-all duration-150 hover:bg-indigo-700 active:scale-95"
             >
               +
             </button>
@@ -148,12 +150,12 @@ export function MenuGrid({
       <div>
         <div className="flex gap-2 overflow-x-auto no-scrollbar pb-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-8 w-20 flex-shrink-0 rounded-[999px]" />
+            <Skeleton key={i} className="h-9 w-20 flex-shrink-0 rounded-full" />
           ))}
         </div>
         <div className="grid grid-cols-2 gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 rounded-2xl" />
+            <Skeleton key={i} className="h-44 rounded-xl" />
           ))}
         </div>
       </div>
@@ -177,7 +179,11 @@ export function MenuGrid({
       {/* Grid or empty */}
       {filtered.length === 0 ? (
         <EmptyState
-          icon="🍽️"
+          icon={
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          }
           title="No items in this category"
           subtitle="Try another category or check back later."
         />
