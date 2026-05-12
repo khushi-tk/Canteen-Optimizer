@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { AdminLayout } from '../components/Admin/AdminLayout';
 import { OrderQueue } from '../components/Admin/OrderQueue';
 import { CrowdControlPanel } from '../components/Admin/CrowdControlPanel';
+import { AnalyticsDashboard } from '../components/Admin/AnalyticsDashboard';
 import { useAdminOrders } from '../hooks/useAdminOrders';
 //import { useAuth } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
@@ -45,10 +46,7 @@ export function AdminDashboard() {
         </div>
       )}
       {activeTab === 'analytics' && (
-        <div className="max-w-lg">
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">Analytics</h2>
-          <p className="text-sm text-slate-500">Sales and crowd analytics dashboard coming soon.</p>
-        </div>
+        <AnalyticsDashboard orders={orders} stats={stats} />
       )}
     </AdminLayout>
   );
