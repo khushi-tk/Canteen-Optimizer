@@ -8,6 +8,7 @@
 
 import type { CartItem, MenuItem } from '../types';
 import { CrowdMeter } from './CrowdMeter/CrowdMeter';
+import { BestTimeToVisit } from './BestTimeToVisit/BestTimeToVisit';
 import { MenuGrid } from './Menu/MenuGrid';
 import { CartDrawer } from './Menu/CartDrawer';
 import { SectionHeader } from './ui';
@@ -21,7 +22,7 @@ interface HomeViewProps {
   cartTotal: number;
   onAdd: (item: MenuItem) => void;
   onUpdateQty: (id: string, delta: number) => void;
-  onCheckout: () => void;
+  onCheckout: (slotId: string | null) => void; // ← fixed signature
 }
 
 export function HomeView({
@@ -52,6 +53,7 @@ export function HomeView({
 
         {/* Logout Button */}
         <button
+          type="button"
           onClick={logout}
           className="rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600"
         >
@@ -60,8 +62,13 @@ export function HomeView({
       </div>
 
       {/* Crowd Meter */}
-      <div className="px-5 mb-5">
+      <div className="px-5 mb-3">
         <CrowdMeter />
+      </div>
+
+      {/* Best Time to Visit */}
+      <div className="px-5 mb-5">
+        <BestTimeToVisit />
       </div>
 
       {/* Menu */}
