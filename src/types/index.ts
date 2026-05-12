@@ -1,53 +1,45 @@
 /**
  * types/index.ts
  *
- * Central type definitions for the Smart Canteen Optimizer.
- * All shared interfaces and type aliases live here — no inline
- * types are allowed in component files.
+ * Core types for CanteenCrowd — student, admin, and shared.
  */
 
-/* ── Enum-like union types ─────────────────────────────────── */
+/* ── Menu & Cart ─────────────────────────────────────────── */
 
-/** Dietary classification shown as a colored badge on menu items. */
 export type DietaryTag = 'veg' | 'non-veg' | 'vegan' | 'contains-egg';
 
-/** Real-time crowd level used to color the gauge and background. */
-export type CrowdLevel = 'low' | 'medium' | 'high';
-
-/** Lifecycle status of a placed order. */
-export type OrderStatus =
-  | 'pending_payment'
-  | 'confirmed'
-  | 'preparing'
-  | 'ready'
-  | 'picked_up'
-  | 'cancelled';
-
-/** Top-level navigation state — drives the view state-machine. */
-export type AppView = 'home' | 'checkout' | 'confirmation' | 'my-orders';
-
-/* ── Data models ───────────────────────────────────────────── */
-
-/** A single item on the canteen menu. */
 export interface MenuItem {
   id: string;
   name: string;
-  description: string;
   price: number;
-  prepTimeMinutes: number;
-  category: string;
   emoji: string;
   dietaryTag: DietaryTag;
+  category: string;
+  description: string;
+  prepTimeMinutes: number;
   available: boolean;
 }
 
-/** A menu item coupled with an ordered quantity. */
 export interface CartItem {
   menuItem: MenuItem;
   quantity: number;
 }
 
-/** Snapshot of the canteen's current crowd / queue state. */
+/* ── Time Slots ──────────────────────────────────────────── */
+
+export interface TimeSlot {
+  id: string;
+  startTime: string;
+  endTime: string;
+  label: string;
+  spotsRemaining: number;
+  available: boolean;
+}
+
+/* ── Crowd (Student View) ────────────────────────────────── */
+
+export type CrowdLevel = 'low' | 'medium' | 'high';
+
 export interface CrowdStatus {
   level: CrowdLevel;
   estimatedWaitMinutes: number;
@@ -57,49 +49,73 @@ export interface CrowdStatus {
   manualOverride: boolean;
 }
 
-/** An available pickup time-slot window. */
-export interface TimeSlot {
+/* ── Auth & Users ────────────────────────────────────────── */
+
+export type UserRole = 'student' | 'admin';
+
+export interface User {
   id: string;
-  label: string;
-  startTime: string;
-  endTime: string;
-  available: boolean;
-  spotsRemaining: number;
+  email: string;
+  name: string;
+  role: UserRole;
+  avatar?: string;
 }
 
-/** Confirmation token returned after a successful order. */
-export interface OrderToken {
-  orderId: string;
-  tokenCode: string;
-  qrPayload: string;
-  status: OrderStatus;
-  pickupSlot: TimeSlot;
-  items: CartItem[];
-  totalAmount: number;
-  placedAt: string;
-  estimatedReadyAt: string;
+export interface LoginCredentials {
+  email: string;
+  password: string;
 }
 
-/** Generic wrapper for async data, loading, and error state. */
-export interface AsyncState<T> {
-  data: T | null;
+export interface AuthState {
+  user: User | null;
   isLoading: boolean;
   error: string | null;
 }
 
-/* ── API-specific types ────────────────────────────────────── */
+/* ── Orders ──────────────────────────────────────────────── */
 
-/** Standard API envelope used by all service functions. */
-export interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+
+export interface OrderItem {
+  menuItem: MenuItem;
+  quantity: number;
+  subtotal: number;
 }
 
-/** Payload sent to `placeOrder()`. */
-export interface OrderRequest {
-  items: { menuItemId: string; quantity: number }[];
-  totalAmount: number;
-  slotId: string;
-  userId: string;
+export interface Order {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  items: OrderItem[];
+  total: number;
+  status: OrderStatus;
+  timeSlot: string;
+  pickupTime: string;
+  createdAt: string;
+  updatedAt: string;
+  notes?: string;
+}
+
+/* ── Crowd Data (Admin Write) ────────────────────────────── */
+
+export interface CrowdData {
+  currentLevel: CrowdLevel;
+  estimatedWaitMinutes: number;
+  preparingOrderCount: number;
+  staffOnDuty: number;
+  capacityPercentage: number;
+  lastUpdatedAt: string;
+  manualOverride: boolean;
+  overrideReason?: string;
+}
+
+/* ── App Navigation ──────────────────────────────────────── */
+
+export type AppView = 'home' | 'checkout' | 'confirmation' | 'my-orders';
+
+export interface OrderToken {
+  tokenCode: string;
+  orderId: string;
+  pickupTime: string;
+  qrData: string;
 }

@@ -1,68 +1,72 @@
 /**
  * hooks/useCrowdStatus.ts
- *
- * Fetches the live canteen crowd status on mount and silently polls
- * every 30 seconds.  The first load shows a loading spinner; subsequent
- * polls update data in the background without resetting `isLoading`.
- *
- * Returns: { data, isLoading, error, refresh }
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import type { CrowdStatus } from '../types';
-import { fetchCrowdStatus } from '../services/api';
+import { useState, useEffect, useCallback } from 'react';
+import type { CrowdStatus, CrowdData } from '../types';
 
-interface UseCrowdStatusReturn {
-  data: CrowdStatus | null;
-  isLoading: boolean;
-  error: string | null;
-  refresh: () => void;
+const CROWD_STORAGE_KEY = 'canteen_crowd_data';
+
+function loadCrowdData(): CrowdData | null {
+  const stored = localStorage.getItem(CROWD_STORAGE_KEY);
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored) as CrowdData;
+  } catch {
+    return null;
+  }
 }
 
-export function useCrowdStatus(): UseCrowdStatusReturn {
+export function useCrowdStatus() {
   const [data, setData] = useState<CrowdStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const isFirstLoad = useRef(true);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const load = useCallback(async (showSpinner: boolean) => {
-    if (showSpinner) setIsLoading(true);
-    try {
-      const res = await fetchCrowdStatus();
-      setData(res.data);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load crowd status');
-    } finally {
-      if (showSpinner) setIsLoading(false);
+  const refresh = useCallback(async () => {
+    setIsLoading(true);
+    await new Promise((r: (value: unknown) => void) => setTimeout(r, 500));
+
+    const crowdData = loadCrowdData();
+
+    if (crowdData) {
+      setData({
+        level: crowdData.currentLevel,
+        estimatedWaitMinutes: crowdData.estimatedWaitMinutes,
+        preparingOrderCount: crowdData.preparingOrderCount,
+        staffOnDuty: crowdData.staffOnDuty,
+        lastUpdatedAt: crowdData.lastUpdatedAt,
+        manualOverride: crowdData.manualOverride,
+      });
+    } else {
+      setData({
+        level: 'low',
+        estimatedWaitMinutes: 5,
+        preparingOrderCount: 2,
+        staffOnDuty: 3,
+        lastUpdatedAt: new Date().toISOString(),
+        manualOverride: false,
+      });
     }
+
+    setIsLoading(false);
   }, []);
 
-  const refresh = useCallback(() => {
-    void load(true);
-  }, [load]);
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === CROWD_STORAGE_KEY && e.newValue) {
+        refresh();
+      }
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, [refresh]);
 
   useEffect(() => {
-    let cancelled = false;
+    refresh();
+  }, [refresh]);
 
-    const init = async () => {
-      await load(true);
-      if (cancelled) return;
-      isFirstLoad.current = false;
-
-      intervalRef.current = setInterval(() => {
-        void load(false);
-      }, 30_000);
-    };
-
-    void init();
-
-    return () => {
-      cancelled = true;
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [load]);
-
-  return { data, isLoading, error, refresh };
+  return {
+    data,
+    isLoading,
+    refresh,
+  };
 }
