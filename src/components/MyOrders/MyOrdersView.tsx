@@ -46,11 +46,12 @@ type FilterTab = 'all' | 'active' | 'done';
 
 interface MyOrdersViewProps {
   onViewQR: (token: OrderToken) => void;
+  onReorder?: (order: OrderToken) => void;
 }
 
 /* ── Component ─────────────────────────────────────────────── */
 
-export function MyOrdersView({ onViewQR }: MyOrdersViewProps) {
+export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
   const [orders, setOrders] = useState<OrderToken[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>('all');
@@ -239,6 +240,14 @@ export function MyOrdersView({ onViewQR }: MyOrdersViewProps) {
                         className="rounded-xl bg-brand-500 px-3 py-1.5 text-[10px] font-bold text-white transition-all duration-150 hover:bg-brand-600 active:scale-95"
                       >
                         Show QR
+                      </button>
+                    )}
+                    {!active && order.status === 'picked_up' && onReorder && (
+                      <button
+                        onClick={() => onReorder(order)}
+                        className="rounded-xl border-2 border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[10px] font-bold text-indigo-600 transition-all duration-150 hover:bg-indigo-100 hover:border-indigo-300 active:scale-95"
+                      >
+                        🔄 Reorder
                       </button>
                     )}
                   </div>

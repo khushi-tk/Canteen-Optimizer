@@ -32,7 +32,7 @@ const MOCK_ORDERS: Order[] = [
       { menuItem: { id: 'm3', name: 'Cold Coffee', price: 60, emoji: '☕', dietaryTag: 'veg', category: 'Beverages', description: 'Iced coffee with cream', prepTimeMinutes: 3, available: true }, quantity: 1, subtotal: 60 },
     ],
     total: 150,
-    status: 'pending',
+    status: 'pending_payment',
     timeSlot: '12:45 - 13:00',
     pickupTime: '12:45',
     createdAt: new Date(Date.now() - 5 * 60000).toISOString(),
@@ -80,11 +80,11 @@ export function useAdminOrders() {
   }, []);
 
   const stats = {
-    active: orders.filter((o) => ['pending', 'preparing', 'ready'].includes(o.status)).length,
-    pending: orders.filter((o) => o.status === 'pending').length,
+    active: orders.filter((o) => ['pending_payment', 'confirmed', 'preparing', 'ready'].includes(o.status)).length,
+    pending: orders.filter((o) => o.status === 'pending_payment').length,
     preparing: orders.filter((o) => o.status === 'preparing').length,
     ready: orders.filter((o) => o.status === 'ready').length,
-    completed: orders.filter((o) => o.status === 'completed').length,
+    completed: orders.filter((o) => o.status === 'picked_up').length,
     cancelled: orders.filter((o) => o.status === 'cancelled').length,
     revenue: orders
       .filter((o) => o.status !== 'cancelled')

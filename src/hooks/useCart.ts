@@ -50,6 +50,10 @@ export function useCart() {
     setCart([]);
   }, [cart]);
 
+  const clearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
   return {
     cart,
     cartCount,
@@ -57,5 +61,6 @@ export function useCart() {
     addItem,
     updateQty,
     checkout,
+    clearCart,
   };
 }

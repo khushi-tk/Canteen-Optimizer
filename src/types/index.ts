@@ -74,7 +74,13 @@ export interface AuthState {
 
 /* ── Orders ──────────────────────────────────────────────── */
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+export type OrderStatus =
+  | 'pending_payment'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'picked_up'
+  | 'cancelled';
 
 export interface OrderItem {
   menuItem: MenuItem;
@@ -113,9 +119,31 @@ export interface CrowdData {
 
 export type AppView = 'home' | 'checkout' | 'confirmation' | 'my-orders';
 
+/* ── Order Token (Confirmation) ─────────────────────────── */
+
 export interface OrderToken {
-  tokenCode: string;
   orderId: string;
-  pickupTime: string;
-  qrData: string;
+  tokenCode: string;
+  qrPayload: string;
+  status: OrderStatus;
+  pickupSlot: TimeSlot;
+  items: CartItem[];
+  totalAmount: number;
+  placedAt: string;
+  estimatedReadyAt: string;
+}
+
+/* ── API Types ───────────────────────────────────────────── */
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+export interface OrderRequest {
+  items: { menuItemId: string; quantity: number }[];
+  totalAmount: number;
+  slotId: string;
+  userId: string;
 }

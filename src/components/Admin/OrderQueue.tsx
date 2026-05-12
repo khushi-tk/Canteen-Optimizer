@@ -4,7 +4,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Order, OrderStatus } from '../../types';
-import { SectionHeader, Spinner, EmptyState } from '../ui';
+import { Spinner, EmptyState } from '../ui';
 
 interface OrderQueueProps {
   orders: Order[];
@@ -31,10 +31,17 @@ interface StatusConfig {
 }
 
 const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
-  pending: {
+  pending_payment: {
     label: 'Pending',
     color: 'text-amber-700',
     bg: 'bg-amber-50 border-amber-200',
+    next: 'confirmed',
+    nextLabel: 'Confirm',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    color: 'text-blue-700',
+    bg: 'bg-blue-50 border-blue-200',
     next: 'preparing',
     nextLabel: 'Start Preparing',
   },
@@ -49,11 +56,11 @@ const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
     label: 'Ready',
     color: 'text-emerald-700',
     bg: 'bg-emerald-50 border-emerald-200',
-    next: 'completed',
-    nextLabel: 'Complete',
+    next: 'picked_up',
+    nextLabel: 'Picked Up',
   },
-  completed: {
-    label: 'Completed',
+  picked_up: {
+    label: 'Picked Up',
     color: 'text-slate-600',
     bg: 'bg-slate-50 border-slate-200',
   },
@@ -114,7 +121,7 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
-          {(['all', 'pending', 'preparing', 'ready', 'completed', 'cancelled'] as const).map((s: OrderStatus | 'all') => (
+          {(['all', 'pending_payment', 'confirmed', 'preparing', 'ready', 'picked_up', 'cancelled'] as const).map((s: OrderStatus | 'all') => (
             <button
               key={s}
               onClick={() => setFilter(s)}
@@ -127,7 +134,7 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
               {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
               {s !== 'all' && (
                 <span className="ml-1 opacity-75">
-                  {s === 'pending' ? stats.pending : s === 'preparing' ? stats.preparing : s === 'ready' ? stats.ready : s === 'completed' ? stats.completed : stats.cancelled}
+                  {s === 'pending_payment' ? stats.pending : s === 'confirmed' ? stats.preparing : s === 'preparing' ? stats.preparing : s === 'ready' ? stats.ready : s === 'picked_up' ? stats.completed : stats.cancelled}
                 </span>
               )}
             </button>
@@ -238,7 +245,7 @@ function OrderCard({ order, onUpdateStatus, onCancel }: OrderCardProps) {
             {config.nextLabel}
           </button>
         )}
-        {order.status !== 'completed' && order.status !== 'cancelled' && (
+        {order.status !== 'picked_up' && order.status !== 'cancelled' && (
           <button
             onClick={() => onCancel(order.id)}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
