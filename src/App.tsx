@@ -7,34 +7,85 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { AppView, OrderToken } from './types';
+
+import type { AppView, OrderToken, TimeSlot } from './types';
+
 import { useAuth } from './context/AuthContext';
 import { useMenu } from './hooks/useMenu';
 import { useCart } from './hooks/useCart';
 import { useOrder } from './hooks/useOrder';
 import { useReorder } from './hooks/useReorder';
 import { useToast } from './hooks/useToast';
+
 import { LoginPage } from './pages/LoginPage';
 import { AdminDashboard } from './pages/AdminDashboard';
+
 import { HomeView } from './components/HomeView';
 import { BottomNav } from './components/BottomNav';
 import { MyOrdersView } from './components/MyOrders/MyOrdersView';
 import { CheckoutSummary } from './components/Checkout/CheckoutSummary';
 import { OrderTokenScreen } from './components/OrderToken/OrderTokenScreen';
+
 import { Spinner } from './components/ui';
+
+/* Shared demo slots fallback */
+const DEMO_SLOTS: TimeSlot[] = [
+  {
+    id: '1',
+    label: '1:00 PM – 1:15 PM',
+    startTime: '1:00 PM',
+    endTime: '1:15 PM',
+    spotsRemaining: 8,
+    available: true,
+  },
+  {
+    id: '2',
+    label: '1:15 PM – 1:30 PM',
+    startTime: '1:15 PM',
+    endTime: '1:30 PM',
+    spotsRemaining: 4,
+    available: true,
+  },
+  {
+    id: '3',
+    label: '1:30 PM – 1:45 PM',
+    startTime: '1:30 PM',
+    endTime: '1:45 PM',
+    spotsRemaining: 1,
+    available: true,
+  },
+  {
+    id: '4',
+    label: '1:45 PM – 2:00 PM',
+    startTime: '1:45 PM',
+    endTime: '2:00 PM',
+    spotsRemaining: 0,
+    available: false,
+  },
+];
 
 export default function App() {
   const { isAuthenticated, isAdmin, isLoading, user } = useAuth();
+
   const { items: menuItems, isLoading: menuLoading } = useMenu();
-  const { cart, cartCount, cartTotal, addItem, updateQty, clearCart } = useCart();
+
+  const {
+    cart,
+    cartCount,
+    cartTotal,
+    addItem,
+    updateQty,
+    clearCart,
+  } = useCart();
+
   const { toast } = useToast();
 
-  // Navigation state
+  /* ── Navigation State ───────────────────────────────────── */
   const [view, setView] = useState<AppView>('home');
 
-  // Order / checkout flow
+  /* ── Order / Checkout Flow ─────────────────────────────── */
   const {
-    slots,
+    slots = DEMO_SLOTS,
     slotsLoading,
     selectedSlotId,
     selectSlot,
@@ -45,13 +96,14 @@ export default function App() {
     resetOrder,
   } = useOrder();
 
-  // Confirmed token (for the confirmation screen)
-  const [confirmedToken, setConfirmedToken] = useState<OrderToken | null>(null);
+  /* ── Confirmation Screen State ─────────────────────────── */
+  const [confirmedToken, setConfirmedToken] =
+    useState<OrderToken | null>(null);
 
-  // Active order count for BottomNav badge (simple: 0 since we don't persist)
+  /* ── Active Orders Badge ───────────────────────────────── */
   const [activeOrderCount] = useState(0);
 
-  // ── Reorder hook ──────────────────────────────────────────
+  /* ── Reorder Hook ──────────────────────────────────────── */
   const navigateToCheckout = useCallback(() => {
     setView('checkout');
   }, []);
@@ -78,7 +130,9 @@ export default function App() {
       if (result.unavailable.length > 0) {
         toast.warning(
           `Added ${result.added} item${result.added > 1 ? 's' : ''} to cart`,
-          `${result.unavailable.join(', ')} ${result.unavailable.length > 1 ? 'are' : 'is'} no longer available.`,
+          `${result.unavailable.join(', ')} ${
+            result.unavailable.length > 1 ? 'are' : 'is'
+          } no longer available.`,
         );
       } else {
         toast.success(
@@ -90,29 +144,30 @@ export default function App() {
     [reorder, toast],
   );
 
-  // ── Checkout handlers ─────────────────────────────────────
+  /* ── Checkout Handlers ─────────────────────────────────── */
   const handleProceedToCheckout = useCallback(() => {
     setView('checkout');
   }, []);
 
   const handlePlaceOrder = useCallback(async () => {
     if (!user) return;
+
     await submitOrder(cart, cartTotal, user.id);
   }, [user, cart, cartTotal, submitOrder]);
 
-  // When orderToken is set (order placed successfully), go to confirmation
   const handleGoToConfirmation = useCallback(() => {
     if (orderToken) {
       setConfirmedToken(orderToken);
+
       clearCart();
       resetOrder();
+
       setView('confirmation');
     }
   }, [orderToken, clearCart, resetOrder]);
 
-  // Watch for orderToken changes to auto-navigate
+  /* Auto transition after successful order */
   if (orderToken && view === 'checkout') {
-    // Schedule navigation for next render to avoid setState during render
     setTimeout(() => handleGoToConfirmation(), 0);
   }
 
@@ -130,7 +185,7 @@ export default function App() {
     setView('confirmation');
   }, []);
 
-  // ── Loading state ─────────────────────────────────────────
+  /* ── Loading ───────────────────────────────────────────── */
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
@@ -139,19 +194,20 @@ export default function App() {
     );
   }
 
+  /* ── Auth Gate ─────────────────────────────────────────── */
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
-  // ── Admin route ─────────────────────────────────────────
+  /* ── Admin Route ───────────────────────────────────────── */
   if (isAdmin) {
     return <AdminDashboard />;
   }
 
-  // ── Student route ───────────────────────────────────────
+  /* ── Student Route ────────────────────────────────────── */
   return (
-    <div className="mx-auto max-w-[390px] min-h-screen bg-slate-50">
-      {/* Checkout screen */}
+    <div className="mx-auto min-h-screen max-w-[390px] bg-slate-50">
+      {/* Checkout */}
       {view === 'checkout' && (
         <CheckoutSummary
           cart={cart}
@@ -167,7 +223,7 @@ export default function App() {
         />
       )}
 
-      {/* Confirmation screen */}
+      {/* Confirmation */}
       {view === 'confirmation' && confirmedToken && (
         <OrderTokenScreen
           token={confirmedToken}
@@ -175,7 +231,7 @@ export default function App() {
         />
       )}
 
-      {/* Home (Menu) view */}
+      {/* Home */}
       {view === 'home' && (
         <HomeView
           menuItems={menuItems}
@@ -189,7 +245,7 @@ export default function App() {
         />
       )}
 
-      {/* My Orders view */}
+      {/* My Orders */}
       {view === 'my-orders' && (
         <MyOrdersView
           onViewQR={handleViewQR}
@@ -197,7 +253,7 @@ export default function App() {
         />
       )}
 
-      {/* Bottom navigation */}
+      {/* Bottom Navigation */}
       <BottomNav
         currentView={view}
         activeOrderCount={activeOrderCount}
