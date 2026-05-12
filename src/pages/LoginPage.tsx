@@ -3,10 +3,7 @@
  */
 
 import { useState } from 'react';
-import type { LoginCredentials } from '../types';
-//import { useAuth } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
-//^ temporary
 import { Spinner, ErrorBanner } from '../components/ui';
 
 export function LoginPage() {
@@ -32,21 +29,40 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white">
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">CanteenCrowd</h1>
-          <p className="mt-1 text-sm text-slate-500">College Dining Management</p>
-        </div>
+    /* 
+      Outer shell: fills the whole screen on any device,
+      centers the phone-sized content on desktop 
+    */
+    <div className="flex min-h-screen items-center justify-center bg-gray-950">
 
-        <div className="rounded-xl bg-white p-6 border border-slate-100 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900 mb-4">Sign In</h2>
+      {/*
+        Phone frame: fixed portrait dimensions.
+        On a real phone this fills the screen naturally.
+        On desktop it shows as a centered phone-sized card.
+      */}
+      <div
+        className="relative w-[390px] h-[844px] max-w-full max-h-[100dvh] overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/login-bg.jpg')" }}
+      >
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/45" />
+
+        {/* Scrollable content */}
+        <div className="relative z-10 flex flex-col justify-center h-full px-8 overflow-y-auto">
+
+          {/* Logo + branding */}
+          <div className="mb-8 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/80 backdrop-blur-sm text-white shadow-lg">
+              <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight text-white drop-shadow-lg">CanteenCrowd</h1>
+            <p className="mt-1 text-sm text-white/90 font-medium drop-shadow-md">College Dining Management</p>
+          </div>
+
+          <h2 className="text-base font-semibold text-white mb-4 drop-shadow-md">Sign In</h2>
 
           {error && (
             <div className="mb-4">
@@ -56,7 +72,7 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-1 drop-shadow-sm">
                 Email
               </label>
               <input
@@ -66,12 +82,12 @@ export function LoginPage() {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 placeholder="you@college.edu"
                 required
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-white/90 mb-1 drop-shadow-sm">
                 Password
               </label>
               <div className="relative">
@@ -82,12 +98,12 @@ export function LoginPage() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 pr-10 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
+                  className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-3 py-2 pr-10 text-sm text-white placeholder:text-white/50 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? (
@@ -107,7 +123,7 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600/90 backdrop-blur-sm py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-150 hover:bg-indigo-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-1"
             >
               {isLoading ? (
                 <>
@@ -120,30 +136,31 @@ export function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-4 pt-4 border-t border-slate-100">
-            <p className="text-xs font-medium text-slate-400 mb-2">Demo Accounts</p>
+          <div className="mt-6 pt-4 border-t border-white/20">
+            <p className="text-xs font-semibold text-white/70 mb-2 drop-shadow-sm">Demo Accounts</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => quickFill('student')}
-                className="flex-1 rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                className="flex-1 rounded-md bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-colors"
               >
                 Student
               </button>
               <button
                 type="button"
                 onClick={() => quickFill('admin')}
-                className="flex-1 rounded-md bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-200 transition-colors"
+                className="flex-1 rounded-md bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-colors"
               >
                 Admin
               </button>
             </div>
           </div>
-        </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} College Canteen Services
-        </p>
+          <p className="mt-8 text-center text-[10px] uppercase tracking-widest font-bold text-white/60 drop-shadow-sm">
+            © {new Date().getFullYear()} College Canteen Services
+          </p>
+
+        </div>
       </div>
     </div>
   );
