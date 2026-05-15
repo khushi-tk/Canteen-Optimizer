@@ -1,13 +1,21 @@
 /**
  * hooks/useAdminOrders.ts
  *
- * Admin order queue management with status transitions.
+ * Admin order queue management with Supabase persistence and
+ * real-time updates. Falls back to mock data when Supabase is
+ * not configured.
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Order, OrderStatus } from '../types';
+import { supabase } from '../services/supabaseClient';
+import {
+  fetchAllOrders,
+  updateOrderStatus as updateOrderStatusInDB,
+  subscribeToOrders,
+} from '../services/orderService';
 
-// Mock initial orders
+// Mock initial orders (fallback when Supabase is not configured)
 const MOCK_ORDERS: Order[] = [
   {
     id: 'ord_001',
@@ -55,29 +63,92 @@ const MOCK_ORDERS: Order[] = [
 ];
 
 export function useAdminOrders() {
-  const [orders, setOrders] = useState<Order[]>(MOCK_ORDERS);
-  const [isLoading, setIsLoading] = useState(false);
+  const [orders, setOrders] = useState<Order[]>(supabase ? [] : MOCK_ORDERS);
+  const [isLoading, setIsLoading] = useState(!!supabase);
   const [error, setError] = useState<string | null>(null);
+  const unsubRef = useRef<(() => void) | null>(null);
 
-  const updateStatus = useCallback((orderId: string, newStatus: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId
-          ? { ...o, status: newStatus, updatedAt: new Date().toISOString() }
-          : o
-      )
-    );
+  /* ── Load orders from Supabase ──────────────────────────── */
+  const loadOrders = useCallback(async () => {
+    if (!supabase) return;
+    try {
+      const data = await fetchAllOrders();
+      setOrders(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load orders');
+    }
   }, []);
 
-  const cancelOrder = useCallback((orderId: string) => {
-    updateStatus(orderId, 'cancelled');
-  }, [updateStatus]);
+  /* ── Initial fetch + real-time subscription ─────────────── */
+  useEffect(() => {
+    if (!supabase) return;
+
+    const init = async () => {
+      setIsLoading(true);
+      await loadOrders();
+      setIsLoading(false);
+    };
+    void init();
+
+    // Subscribe to real-time changes — re-fetch on any change
+    unsubRef.current = subscribeToOrders(() => {
+      void loadOrders();
+    });
+
+    return () => {
+      unsubRef.current?.();
+    };
+  }, [loadOrders]);
+
+  /* ── Status update (persists to Supabase) ───────────────── */
+  const updateStatus = useCallback(
+    async (orderId: string, newStatus: OrderStatus) => {
+      if (supabase) {
+        // Optimistic update
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === orderId
+              ? { ...o, status: newStatus, updatedAt: new Date().toISOString() }
+              : o,
+          ),
+        );
+        try {
+          await updateOrderStatusInDB(orderId, newStatus);
+        } catch {
+          // Revert on failure — re-fetch
+          void loadOrders();
+        }
+      } else {
+        // Mock fallback
+        setOrders((prev) =>
+          prev.map((o) =>
+            o.id === orderId
+              ? { ...o, status: newStatus, updatedAt: new Date().toISOString() }
+              : o,
+          ),
+        );
+      }
+    },
+    [loadOrders],
+  );
+
+  const cancelOrder = useCallback(
+    (orderId: string) => {
+      void updateStatus(orderId, 'cancelled');
+    },
+    [updateStatus],
+  );
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    await new Promise((r) => setTimeout(r, 600));
+    if (supabase) {
+      await loadOrders();
+    } else {
+      await new Promise((r) => setTimeout(r, 600));
+    }
     setIsLoading(false);
-  }, []);
+  }, [loadOrders]);
 
   const stats = {
     active: orders.filter((o) => ['pending_payment', 'confirmed', 'preparing', 'ready'].includes(o.status)).length,

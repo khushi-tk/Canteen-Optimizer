@@ -13,6 +13,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { OrderStatus, OrderToken } from '../../types';
 import { fetchMyOrders } from '../../services/api';
+import { supabase } from '../../services/supabaseClient';
+import { subscribeToOrders } from '../../services/orderService';
+import { useAuth } from '../../context/AuthContext';
 import { EmptyState, SectionHeader, Skeleton } from '../ui';
 
 /* ── Status badge config ───────────────────────────────────── */
@@ -52,39 +55,52 @@ interface MyOrdersViewProps {
 /* ── Component ─────────────────────────────────────────────── */
 
 export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
+  const { user } = useAuth();
   const [orders, setOrders] = useState<OrderToken[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>('all');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const unsubRef = useRef<(() => void) | null>(null);
 
   const load = useCallback(async (showSpinner: boolean) => {
     if (showSpinner) setIsLoading(true);
     try {
-      const res = await fetchMyOrders();
+      const res = await fetchMyOrders(user?.id);
       setOrders(res.data);
     } catch {
       // silently fail
     } finally {
       if (showSpinner) setIsLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   /* Initial load */
   useEffect(() => {
     void load(true);
   }, [load]);
 
-  /* Auto-refresh when there are active orders */
+  /* Auto-refresh when there are active orders (mock fallback) */
   const hasActive = useMemo(() => orders.some(isActiveOrder), [orders]);
 
   useEffect(() => {
-    if (hasActive) {
+    if (!supabase && hasActive) {
       intervalRef.current = setInterval(() => void load(false), 15_000);
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [hasActive, load]);
+
+  /* Real-time subscription for Supabase — admin status changes appear live */
+  useEffect(() => {
+    if (!supabase) return;
+    unsubRef.current = subscribeToOrders(() => {
+      void load(false);
+    });
+    return () => {
+      unsubRef.current?.();
+    };
+  }, [load]);
 
   const filtered = useMemo(() => {
     if (tab === 'active') return orders.filter(isActiveOrder);

@@ -131,6 +131,8 @@ export interface OrderToken {
   totalAmount: number;
   placedAt: string;
   estimatedReadyAt: string;
+  studentName?: string;
+  studentEmail?: string;
 }
 
 /* ── API Types ───────────────────────────────────────────── */
@@ -143,7 +145,10 @@ export interface ApiResponse<T> {
 
 export interface OrderRequest {
   items: { menuItemId: string; quantity: number }[];
+  cart: CartItem[];
   totalAmount: number;
   slotId: string;
   userId: string;
+  userName: string;
+  userEmail: string;
 }

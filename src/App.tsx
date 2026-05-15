@@ -152,7 +152,7 @@ export default function App() {
   const handlePlaceOrder = useCallback(async () => {
     if (!user) return;
 
-    await submitOrder(cart, cartTotal, user.id);
+    await submitOrder(cart, cartTotal, user.id, user.name, user.email);
   }, [user, cart, cartTotal, submitOrder]);
 
   const handleGoToConfirmation = useCallback(() => {

@@ -6,6 +6,9 @@
  * returns realistic mock data after an artificial 400-800 ms delay.
  * Flip the flag to "false" to hit real REST endpoints at
  * VITE_API_BASE_URL with JWT auth from localStorage.
+ *
+ * Orders are persisted to Supabase when configured, regardless of
+ * MOCK_MODE — menu and crowd data stay mocked.
  */
 
 import type {
@@ -17,6 +20,12 @@ import type {
   OrderToken,
   TimeSlot,
 } from '../types';
+
+import { supabase } from './supabaseClient';
+import {
+  createOrder,
+  fetchStudentOrders,
+} from './orderService';
 
 /* ── Helpers ───────────────────────────────────────────────── */
 
@@ -242,43 +251,67 @@ export async function fetchTimeSlots(): Promise<ApiResponse<TimeSlot[]>> {
 }
 
 export async function placeOrder(req: OrderRequest): Promise<ApiResponse<OrderToken>> {
-  if (MOCK_MODE) {
-    await mockDelay();
-    const slots = generateTimeSlots();
-    const slot = slots.find((s) => s.id === req.slotId) ?? slots[0];
-    const tokenCode = generateTokenCode();
-    const now = new Date();
-    const readyAt = new Date(now.getTime() + 18 * 60_000);
+  // Always generate token data locally (mock auth means no server-side generation)
+  const slots = generateTimeSlots();
+  const slot = slots.find((s) => s.id === req.slotId) ?? slots[0];
+  const tokenCode = generateTokenCode();
+  const now = new Date();
+  const readyAt = new Date(now.getTime() + 18 * 60_000);
+  const orderId = `ord-${Date.now()}`;
 
-    // Rebuild CartItem[] from the menu
-    const items: CartItem[] = req.items.map((ri) => ({
-      menuItem: MOCK_MENU.find((m) => m.id === ri.menuItemId) ?? MOCK_MENU[0],
-      quantity: ri.quantity,
-    }));
+  const items: CartItem[] = req.cart.length > 0
+    ? req.cart
+    : req.items.map((ri) => ({
+        menuItem: MOCK_MENU.find((m) => m.id === ri.menuItemId) ?? MOCK_MENU[0],
+        quantity: ri.quantity,
+      }));
 
-    const token: OrderToken = {
-      orderId: `ord-${Date.now()}`,
-      tokenCode,
-      qrPayload: JSON.stringify({ orderId: `ord-${Date.now()}`, tokenCode }),
-      status: 'confirmed',
-      pickupSlot: slot,
+  const token: OrderToken = {
+    orderId,
+    tokenCode,
+    qrPayload: JSON.stringify({ orderId, tokenCode }),
+    status: 'confirmed',
+    pickupSlot: slot,
+    items,
+    totalAmount: req.totalAmount,
+    placedAt: now.toISOString(),
+    estimatedReadyAt: readyAt.toISOString(),
+    studentName: req.userName,
+    studentEmail: req.userEmail,
+  };
+
+  // Persist to Supabase when available
+  if (supabase) {
+    await createOrder({
+      id: orderId,
+      studentId: req.userId,
+      studentName: req.userName,
+      studentEmail: req.userEmail,
       items,
-      totalAmount: req.totalAmount,
-      placedAt: now.toISOString(),
+      total: req.totalAmount,
+      status: 'confirmed',
+      timeSlot: slot.label,
+      pickupTime: slot.startTime,
+      pickupSlot: slot,
+      tokenCode,
+      qrPayload: token.qrPayload,
       estimatedReadyAt: readyAt.toISOString(),
-    };
-    return { success: true, data: token };
+    });
   }
-  return apiFetch<OrderToken>('/orders', {
-    method: 'POST',
-    body: JSON.stringify(req),
-  });
+
+  return { success: true, data: token };
 }
 
-export async function fetchMyOrders(): Promise<ApiResponse<OrderToken[]>> {
+export async function fetchMyOrders(userId?: string): Promise<ApiResponse<OrderToken[]>> {
+  // Use Supabase when available and userId is provided
+  if (supabase && userId) {
+    const orders = await fetchStudentOrders(userId);
+    return { success: true, data: orders };
+  }
+
+  // Fallback to mock data
   if (MOCK_MODE) {
     await mockDelay();
-    // Return a couple of past mock orders for demo purposes
     const slots = generateTimeSlots();
     const pastOrders: OrderToken[] = [
       {

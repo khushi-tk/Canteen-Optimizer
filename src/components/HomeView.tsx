@@ -21,7 +21,7 @@ interface HomeViewProps {
   cartTotal: number;
   onAdd: (item: MenuItem) => void;
   onUpdateQty: (id: string, delta: number) => void;
-  onCheckout: (slotId: string | null) => void; // ← fixed signature
+  onCheckout: () => void;
 }
 
 export function HomeView({

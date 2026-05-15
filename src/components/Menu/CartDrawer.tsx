@@ -1,22 +1,21 @@
 /**
  * components/Menu/CartDrawer.tsx
  *
- * Professional bottom-sheet cart drawer with integrated
- * pickup time-slot selection.
+ * Bottom-sheet cart drawer. Shows a summary bar when collapsed,
+ * full item list when expanded, and a single "Proceed to Checkout"
+ * CTA. Time-slot selection is handled on the dedicated Checkout page.
  */
 
 import { useState } from 'react';
 
-import type { CartItem, TimeSlot } from '../../types';
-
-import { TimeSlotPicker } from '../Checkout/TimeSlotPicker';
+import type { CartItem } from '../../types';
 
 interface CartDrawerProps {
   cart: CartItem[];
   cartCount: number;
   cartTotal: number;
   onUpdateQty: (id: string, delta: number) => void;
-  onCheckout: (slotId: string | null) => void;
+  onCheckout: () => void;
 }
 
 export function CartDrawer({
@@ -27,45 +26,6 @@ export function CartDrawer({
   onCheckout,
 }: CartDrawerProps) {
   const [expanded, setExpanded] = useState(false);
-
-  const [selectedSlotId, setSelectedSlotId] =
-    useState<string | null>(null);
-
-  /* Demo slots */
-  const slots: TimeSlot[] = [
-    {
-      id: '1',
-      label: '1:00 PM – 1:15 PM',
-      startTime: '1:00 PM',
-      endTime: '1:15 PM',
-      spotsRemaining: 8,
-      available: true,
-    },
-    {
-      id: '2',
-      label: '1:15 PM – 1:30 PM',
-      startTime: '1:15 PM',
-      endTime: '1:30 PM',
-      spotsRemaining: 4,
-      available: true,
-    },
-    {
-      id: '3',
-      label: '1:30 PM – 1:45 PM',
-      startTime: '1:30 PM',
-      endTime: '1:45 PM',
-      spotsRemaining: 1,
-      available: true,
-    },
-    {
-      id: '4',
-      label: '1:45 PM – 2:00 PM',
-      startTime: '1:45 PM',
-      endTime: '2:00 PM',
-      spotsRemaining: 0,
-      available: false,
-    },
-  ];
 
   if (cartCount === 0) return null;
 
@@ -84,7 +44,7 @@ export function CartDrawer({
         className="fixed left-0 right-0 z-[55] mx-auto w-full max-w-[390px]"
         style={{
           bottom: expanded ? 0 : 56,
-          height: expanded ? '82vh' : 80,
+          height: expanded ? '70vh' : 80,
           transition:
             'height 300ms cubic-bezier(0.4, 0, 0.2, 1), bottom 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
@@ -197,20 +157,6 @@ export function CartDrawer({
                   ₹{cartTotal}
                 </span>
               </div>
-
-              {/* Time slots */}
-              <div className="mt-5">
-                <h3 className="mb-3 text-sm font-bold text-slate-800">
-                  Select Pickup Slot
-                </h3>
-
-                <TimeSlotPicker
-                  slots={slots}
-                  isLoading={false}
-                  selectedSlotId={selectedSlotId}
-                  onSelect={setSelectedSlotId}
-                />
-              </div>
             </div>
           )}
 
@@ -218,25 +164,18 @@ export function CartDrawer({
           <div className="px-5 pb-5 pt-3">
             <button
               type="button"
-              disabled={expanded && !selectedSlotId}
               onClick={() => {
                 if (!expanded) {
                   setExpanded(true);
-                } else if (selectedSlotId) {
-                  onCheckout(selectedSlotId);
+                } else {
+                  onCheckout();
                 }
               }}
-              className={`w-full rounded-2xl py-3.5 text-center text-sm font-semibold shadow-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
-                expanded && !selectedSlotId
-                  ? 'cursor-not-allowed bg-slate-300 text-white'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-[0.98]'
-              }`}
+              className="w-full rounded-2xl bg-indigo-600 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
             >
               {!expanded
                 ? `Review & Checkout — ₹${cartTotal} →`
-                : selectedSlotId
-                  ? `Proceed to Checkout — ₹${cartTotal}`
-                  : 'Select a pickup slot'}
+                : `Proceed to Checkout — ₹${cartTotal}`}
             </button>
           </div>
         </div>
