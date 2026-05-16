@@ -8,12 +8,13 @@ import { OrderQueue } from '../components/Admin/OrderQueue';
 import { CrowdControlPanel } from '../components/Admin/CrowdControlPanel';
 import { AnalyticsDashboard } from '../components/Admin/AnalyticsDashboard';
 import { MenuManagement } from '../components/Admin/MenuManagement';
+import { InventoryPanel } from '../components/Admin/InventoryPanel';
 import { useAdminOrders } from '../hooks/useAdminOrders';
 //import { useAuth } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
 
 export function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'orders' | 'crowd' | 'menu' | 'analytics'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'crowd' | 'menu' | 'analytics' | 'inventory'>('orders');
   const { orders, stats, isLoading, updateStatus, cancelOrder } = useAdminOrders();
   const { user } = useAuth();
 
@@ -44,6 +45,7 @@ export function AdminDashboard() {
       {activeTab === 'analytics' && (
         <AnalyticsDashboard orders={orders} stats={stats} />
       )}
+      {activeTab === 'inventory' && <InventoryPanel />}
     </AdminLayout>
   );
 }
