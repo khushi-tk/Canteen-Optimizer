@@ -234,9 +234,24 @@ export async function fetchCrowdStatus(): Promise<ApiResponse<CrowdStatus>> {
   return apiFetch<CrowdStatus>('/crowd');
 }
 
+export const MENU_STORAGE_KEY = 'canteen_menu_data';
+
+export function getDefaultMenu(): MenuItem[] {
+  return [...MOCK_MENU];
+}
+
 export async function fetchMenu(): Promise<ApiResponse<MenuItem[]>> {
   if (MOCK_MODE) {
     await mockDelay();
+    const stored = localStorage.getItem(MENU_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as MenuItem[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return { success: true, data: parsed };
+        }
+      } catch { /* fall through to defaults */ }
+    }
     return { success: true, data: MOCK_MENU };
   }
   return apiFetch<MenuItem[]>('/menu');
