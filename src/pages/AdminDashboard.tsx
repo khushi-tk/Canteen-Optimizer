@@ -7,6 +7,7 @@ import { AdminLayout } from '../components/Admin/AdminLayout';
 import { OrderQueue } from '../components/Admin/OrderQueue';
 import { CrowdControlPanel } from '../components/Admin/CrowdControlPanel';
 import { AnalyticsDashboard } from '../components/Admin/AnalyticsDashboard';
+import { MenuManagement } from '../components/Admin/MenuManagement';
 import { useAdminOrders } from '../hooks/useAdminOrders';
 //import { useAuth } from '../hooks/useAuth';
 import { useAuth } from '../context/AuthContext';
@@ -39,12 +40,7 @@ export function AdminDashboard() {
         />
       )}
       {activeTab === 'crowd' && <CrowdControlPanel />}
-      {activeTab === 'menu' && (
-        <div className="max-w-lg">
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">Menu Management</h2>
-          <p className="text-sm text-slate-500">Menu editing interface coming soon.</p>
-        </div>
-      )}
+      {activeTab === 'menu' && <MenuManagement />}
       {activeTab === 'analytics' && (
         <AnalyticsDashboard orders={orders} stats={stats} />
       )}

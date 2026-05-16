@@ -19,7 +19,13 @@ interface UseOrderReturn {
   orderToken: OrderToken | null;
   isPlacingOrder: boolean;
   orderError: string | null;
-  submitOrder: (cart: CartItem[], total: number, userId: string) => Promise<void>;
+  submitOrder: (
+    cart: CartItem[],
+    total: number,
+    userId: string,
+    userName: string,
+    userEmail: string,
+  ) => Promise<void>;
   resetOrder: () => void;
 }
 
@@ -60,7 +66,13 @@ export function useOrder(): UseOrderReturn {
   }, []);
 
   const submitOrder = useCallback(
-    async (cart: CartItem[], total: number, userId: string) => {
+    async (
+      cart: CartItem[],
+      total: number,
+      userId: string,
+      userName: string,
+      userEmail: string,
+    ) => {
       if (!selectedSlotId) return;
       setIsPlacingOrder(true);
       setOrderError(null);
@@ -70,9 +82,12 @@ export function useOrder(): UseOrderReturn {
             menuItemId: ci.menuItem.id,
             quantity: ci.quantity,
           })),
+          cart,
           totalAmount: total,
           slotId: selectedSlotId,
           userId,
+          userName,
+          userEmail,
         });
         setOrderToken(res.data);
       } catch (err) {

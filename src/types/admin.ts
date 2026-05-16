@@ -33,7 +33,7 @@ export interface AuthState {
 
 /* ── Orders (Admin View) ──────────────────────────────────── */
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+export type OrderStatus = 'pending_payment' | 'confirmed' | 'preparing' | 'ready' | 'picked_up' | 'cancelled';
 
 export interface OrderItem {
   menuItem: MenuItem;
