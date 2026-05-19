@@ -83,6 +83,15 @@ const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
     bg: 'bg-red-50 border-red-200',
     darkBg: 'dark:bg-red-950 dark:border-red-800',
   },
+   completed: {
+    label: 'Completed',
+    color: 'text-gray-500',
+    darkColor: 'dark:text-gray-400',
+    bg: 'bg-gray-50',
+    darkBg: 'dark:bg-gray-900/20',
+    next: 'completed',      
+    nextLabel: 'Archive',
+  },
 };
 
 export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel }: OrderQueueProps) {

@@ -21,7 +21,7 @@ import type {
   TimeSlot,
 } from '../types';
 
-import { supabase } from './supabaseClient';
+//import { supabase } from './supabaseClient';
 import {
   createOrder,
   fetchStudentOrders,
