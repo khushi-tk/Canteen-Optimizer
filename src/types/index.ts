@@ -4,6 +4,14 @@
  * Core types for CanteenCrowd — student, admin, and shared.
  */
 
+/* ── Generic API Wrapper ─────────────────────────────────── */
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
 /* ── Menu & Cart ─────────────────────────────────────────── */
 
 export type DietaryTag = 'veg' | 'non-veg' | 'vegan' | 'contains-egg';
@@ -74,14 +82,22 @@ export interface AuthState {
 
 /* ── Orders ──────────────────────────────────────────────── */
 
-export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'completed' | 'cancelled';
+export type OrderStatus =
+  | 'pending_payment'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'picked_up'
+  | 'cancelled';
 
+/** Admin-facing order line item (with computed subtotal) */
 export interface OrderItem {
   menuItem: MenuItem;
   quantity: number;
   subtotal: number;
 }
 
+/** Admin-facing order record (Supabase / dashboard view) */
 export interface Order {
   id: string;
   studentName: string;
@@ -93,6 +109,55 @@ export interface Order {
   pickupTime: string;
   createdAt: string;
   updatedAt: string;
+  notes?: string;
+}
+
+/** Payload when student places an order */
+export interface OrderRequest {
+  /** Fallback cart items (used when cart array is empty) */
+  items: { menuItemId: string; quantity: number }[];
+  /** Primary cart items (preferred by API) */
+  cart: CartItem[];
+  totalAmount: number;
+  slotId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  notes?: string;
+}
+
+/** Student-facing receipt / order token */
+export interface OrderToken {
+  orderId: string;
+  tokenCode: string;
+  qrPayload: string;
+  status: OrderStatus;
+  pickupSlot: TimeSlot;
+  items: CartItem[];
+  totalAmount: number;
+  placedAt: string;
+  estimatedReadyAt: string;
+  studentName?: string;
+  studentEmail?: string;
+}
+
+/** Supabase order row shape (bridging OrderToken ↔ Supabase) */
+export interface SupabaseOrder {
+  id: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  items: CartItem[];
+  total: number;
+  status: OrderStatus;
+  timeSlot: string;
+  pickupTime: string;
+  pickupSlot: TimeSlot;
+  tokenCode: string;
+  qrPayload: string;
+  estimatedReadyAt: string;
+  createdAt?: string;
+  updatedAt?: string;
   notes?: string;
 }
 
@@ -111,11 +176,12 @@ export interface CrowdData {
 
 /* ── App Navigation ──────────────────────────────────────── */
 
-export type AppView = 'home' | 'checkout' | 'confirmation' | 'my-orders';
-
-export interface OrderToken {
-  tokenCode: string;
-  orderId: string;
-  pickupTime: string;
-  qrData: string;
-}
+export type AppView = 
+  | 'home' 
+  | 'checkout' 
+  | 'confirmation' 
+  | 'my-orders'
+  | 'admin-dashboard'
+  | 'admin-menu'
+  | 'admin-orders'
+  | 'admin-crowd';
