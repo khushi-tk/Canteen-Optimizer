@@ -7,7 +7,7 @@
  * Flip the flag to "false" to hit real REST endpoints at
  * VITE_API_BASE_URL with JWT auth from localStorage.
  *
- * Orders are persisted to Supabase when configured, regardless of
+ * Orders are persisted to Supabase/localStorage regardless of
  * MOCK_MODE — menu and crowd data stay mocked.
  */
 
@@ -143,7 +143,7 @@ const MOCK_MENU: MenuItem[] = [
     category: 'North Indian',
     emoji: '🫓',
     dietaryTag: 'veg',
-    available: false, // unavailable item
+    available: false,
   },
   {
     id: 'bu-01',
@@ -199,7 +199,6 @@ function generateTimeSlots(): TimeSlot[] {
     };
     const pad2 = (n: number) => String(n).padStart(2, '0');
 
-    // Make at least one slot full (index 2)
     const spots = i === 2 ? 0 : Math.floor(Math.random() * 9);
 
     return {
@@ -266,7 +265,6 @@ export async function fetchTimeSlots(): Promise<ApiResponse<TimeSlot[]>> {
 }
 
 export async function placeOrder(req: OrderRequest): Promise<ApiResponse<OrderToken>> {
-  // Always generate token data locally (mock auth means no server-side generation)
   const slots = generateTimeSlots();
   const slot = slots.find((s) => s.id === req.slotId) ?? slots[0];
   const tokenCode = generateTokenCode();
@@ -295,36 +293,34 @@ export async function placeOrder(req: OrderRequest): Promise<ApiResponse<OrderTo
     studentEmail: req.userEmail,
   };
 
-  // Persist to Supabase when available
-  if (supabase) {
-    await createOrder({
-      id: orderId,
-      studentId: req.userId,
-      studentName: req.userName,
-      studentEmail: req.userEmail,
-      items,
-      total: req.totalAmount,
-      status: 'confirmed',
-      timeSlot: slot.label,
-      pickupTime: slot.startTime,
-      pickupSlot: slot,
-      tokenCode,
-      qrPayload: token.qrPayload,
-      estimatedReadyAt: readyAt.toISOString(),
-    });
-  }
+  // Persist to Supabase OR localStorage (mock bridge)
+ await createOrder({
+  id: orderId,
+  studentId: req.userId,
+  studentName: req.userName,
+  studentEmail: req.userEmail,
+  items,
+  total: req.totalAmount,
+  status: 'confirmed',
+  timeSlot: slot.label,
+  pickupTime: slot.startTime,
+  pickupSlot: slot,
+  tokenCode,
+  qrPayload: token.qrPayload,
+  estimatedReadyAt: readyAt.toISOString(),
+});
 
   return { success: true, data: token };
 }
 
 export async function fetchMyOrders(userId?: string): Promise<ApiResponse<OrderToken[]>> {
-  // Use Supabase when available and userId is provided
-  if (supabase && userId) {
+  // Always fetch real orders when we have a userId (Supabase OR localStorage mock)
+  if (userId) {
     const orders = await fetchStudentOrders(userId);
     return { success: true, data: orders };
   }
 
-  // Fallback to mock data
+  // No userId — return hardcoded demo data
   if (MOCK_MODE) {
     await mockDelay();
     const slots = generateTimeSlots();

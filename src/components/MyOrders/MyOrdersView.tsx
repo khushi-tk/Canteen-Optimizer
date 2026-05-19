@@ -5,9 +5,6 @@
  * Active orders have a pulsing live banner and auto-refresh every 15s.
  * Each OrderCard shows token code, status badge, item emojis, pickup
  * slot, total, and a "Show QR" button for active orders.
- *
- * Props:
- *   onViewQR — callback to navigate to the QR confirmation screen
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -71,6 +68,13 @@ const STATUS_BADGE: Record<OrderStatus, BadgeCfg> = {
     darkText: 'dark:text-red-300',
     label: 'Cancelled'
   },
+  completed: {
+    bg: 'bg-slate-50',
+    darkBg: 'dark:bg-slate-800',
+    text: 'text-slate-500',
+    darkText: 'dark:text-slate-400',
+    label: 'Completed'
+  },
 };
 
 const ACTIVE_STATUSES: OrderStatus[] = ['confirmed', 'preparing', 'ready'];
@@ -105,8 +109,8 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
     try {
       const res = await fetchMyOrders(user?.id);
       setOrders(res.data);
-    } catch {
-      // silently fail
+    } catch (err) {
+      console.error('[MyOrders] load failed:', err);
     } finally {
       if (showSpinner) setIsLoading(false);
     }
@@ -129,15 +133,25 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
     };
   }, [hasActive, load]);
 
-  /* Real-time subscription for Supabase — admin status changes appear live */
+  /* Real-time subscription (Supabase OR localStorage mock bridge) */
   useEffect(() => {
-    if (!supabase) return;
     unsubRef.current = subscribeToOrders(() => {
       void load(false);
     });
     return () => {
       unsubRef.current?.();
     };
+  }, [load]);
+
+  /* Refresh when tab regains focus */
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'visible') {
+        void load(false);
+      }
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
   }, [load]);
 
   const filtered = useMemo(() => {
