@@ -11,14 +11,40 @@ interface LevelOption {
   value: CrowdLevel;
   label: string;
   color: string;
+  darkColor: string;
   bg: string;
+  darkBg: string;
   desc: string;
 }
 
 const LEVEL_OPTIONS: LevelOption[] = [
-  { value: 'low', label: 'Low Crowd', color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200', desc: 'Minimal wait, plenty of seating' },
-  { value: 'medium', label: 'Moderate', color: 'text-amber-700', bg: 'bg-amber-50 border-amber-200', desc: 'Some queue, seating available' },
-  { value: 'high', label: 'Very Busy', color: 'text-red-700', bg: 'bg-red-50 border-red-200', desc: 'Long queues, limited seating' },
+  {
+    value: 'low',
+    label: 'Low Crowd',
+    color: 'text-emerald-700',
+    darkColor: 'dark:text-emerald-300',
+    bg: 'bg-emerald-50 border-emerald-200',
+    darkBg: 'dark:bg-emerald-950 dark:border-emerald-800',
+    desc: 'Minimal wait, plenty of seating'
+  },
+  {
+    value: 'medium',
+    label: 'Moderate',
+    color: 'text-amber-700',
+    darkColor: 'dark:text-amber-300',
+    bg: 'bg-amber-50 border-amber-200',
+    darkBg: 'dark:bg-amber-950 dark:border-amber-800',
+    desc: 'Some queue, seating available'
+  },
+  {
+    value: 'high',
+    label: 'Very Busy',
+    color: 'text-red-700',
+    darkColor: 'dark:text-red-300',
+    bg: 'bg-red-50 border-red-200',
+    darkBg: 'dark:bg-red-950 dark:border-red-800',
+    desc: 'Long queues, limited seating'
+  },
 ];
 
 export function CrowdControlPanel() {
@@ -53,7 +79,7 @@ export function CrowdControlPanel() {
         action={
           <button
             onClick={refresh}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             aria-label="Refresh"
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -63,28 +89,27 @@ export function CrowdControlPanel() {
         }
       />
 
-      <div className="mb-6 rounded-xl border border-slate-100 bg-white p-4 shadow-sm">
-        <p className="text-xs font-medium text-slate-500 mb-2">Current Student View</p>
+      <div className="mb-6 rounded-xl border border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 shadow-sm">
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Current Student View</p>
         <div className="flex items-center gap-3">
-          <div className={`h-3 w-3 rounded-full ${
-            data.currentLevel === 'low' ? 'bg-emerald-500' : data.currentLevel === 'medium' ? 'bg-amber-500' : 'bg-red-500'
-          }`} />
-          <span className="text-sm font-semibold text-slate-900">
+          <div className={`h-3 w-3 rounded-full ${data.currentLevel === 'low' ? 'bg-emerald-500' : data.currentLevel === 'medium' ? 'bg-amber-500' : 'bg-red-500'
+            }`} />
+          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
             {LEVEL_OPTIONS.find((l: LevelOption) => l.value === data.currentLevel)?.label}
           </span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-500 dark:text-slate-400">
             {data.capacityPercentage}% capacity · {data.estimatedWaitMinutes}m wait
           </span>
         </div>
         {data.manualOverride && (
-          <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-indigo-50 px-3 py-2 text-xs">
-            <svg className="h-3.5 w-3.5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <div className="mt-2 flex items-center gap-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950 px-3 py-2 text-xs">
+            <svg className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
             </svg>
-            <span className="font-medium text-indigo-700">Manual override active</span>
+            <span className="font-medium text-indigo-700 dark:text-indigo-300">Manual override active</span>
             <button
               onClick={clearOverride}
-              className="ml-auto text-indigo-600 hover:text-indigo-800 font-semibold"
+              className="ml-auto text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 font-semibold"
             >
               Clear
             </button>
@@ -93,20 +118,19 @@ export function CrowdControlPanel() {
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-700 mb-2">Crowd Level</label>
+        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Crowd Level</label>
         <div className="grid grid-cols-3 gap-3">
           {LEVEL_OPTIONS.map((opt: LevelOption) => (
             <button
               key={opt.value}
               onClick={() => setLevel(opt.value)}
-              className={`rounded-xl border p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
-                level === opt.value
-                  ? `${opt.bg} ring-2 ring-indigo-500 ring-offset-1`
-                  : 'bg-white border-slate-200 hover:border-slate-300'
-              }`}
+              className={`rounded-xl border p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800 ${level === opt.value
+                  ? `${opt.bg} ${opt.darkBg} ring-2 ring-indigo-500 ring-offset-1 dark:ring-offset-slate-800`
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
             >
-              <p className={`text-sm font-semibold ${opt.color}`}>{opt.label}</p>
-              <p className="text-[10px] text-slate-500 mt-0.5 leading-tight">{opt.desc}</p>
+              <p className={`text-sm font-semibold ${opt.color} ${opt.darkColor}`}>{opt.label}</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">{opt.desc}</p>
             </button>
           ))}
         </div>
@@ -114,45 +138,45 @@ export function CrowdControlPanel() {
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Est. Wait (min)</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Est. Wait (min)</label>
           <input
             type="number"
             min={0}
             max={120}
             value={waitMinutes}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWaitMinutes(Math.max(0, parseInt(e.target.value) || 0))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Capacity %</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Capacity %</label>
           <input
             type="number"
             min={0}
             max={100}
             value={capacity}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCapacity(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Preparing Orders</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Preparing Orders</label>
           <input
             type="number"
             min={0}
             value={preparing}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPreparing(Math.max(0, parseInt(e.target.value) || 0))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Staff On Duty</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Staff On Duty</label>
           <input
             type="number"
             min={0}
             value={staff}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStaff(Math.max(0, parseInt(e.target.value) || 0))}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
       </div>
@@ -160,11 +184,10 @@ export function CrowdControlPanel() {
       <button
         onClick={handleSave}
         disabled={!hasChanges || isSaving}
-        className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${
-          hasChanges
+        className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800 ${hasChanges
             ? 'bg-indigo-600 text-white shadow-sm hover:bg-indigo-700 active:scale-[0.98]'
-            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-        }`}
+            : 'bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
+          }`}
       >
         {isSaving ? (
           <span className="flex items-center justify-center gap-2">
@@ -176,7 +199,7 @@ export function CrowdControlPanel() {
         )}
       </button>
 
-      <p className="mt-3 text-center text-xs text-slate-400">
+      <p className="mt-3 text-center text-xs text-slate-400 dark:text-slate-500">
         Changes reflect immediately on all student devices
       </p>
     </div>

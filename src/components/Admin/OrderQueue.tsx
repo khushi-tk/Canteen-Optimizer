@@ -25,7 +25,9 @@ interface OrderQueueProps {
 interface StatusConfig {
   label: string;
   color: string;
+  darkColor: string;
   bg: string;
+  darkBg: string;
   next?: OrderStatus;
   nextLabel?: string;
 }
@@ -34,40 +36,52 @@ const STATUS_CONFIG: Record<OrderStatus, StatusConfig> = {
   pending_payment: {
     label: 'Pending',
     color: 'text-amber-700',
+    darkColor: 'dark:text-amber-300',
     bg: 'bg-amber-50 border-amber-200',
+    darkBg: 'dark:bg-amber-950 dark:border-amber-800',
     next: 'confirmed',
     nextLabel: 'Confirm',
   },
   confirmed: {
     label: 'Confirmed',
     color: 'text-blue-700',
+    darkColor: 'dark:text-blue-300',
     bg: 'bg-blue-50 border-blue-200',
+    darkBg: 'dark:bg-blue-950 dark:border-blue-800',
     next: 'preparing',
     nextLabel: 'Start Preparing',
   },
   preparing: {
     label: 'Preparing',
     color: 'text-blue-700',
+    darkColor: 'dark:text-blue-300',
     bg: 'bg-blue-50 border-blue-200',
+    darkBg: 'dark:bg-blue-950 dark:border-blue-800',
     next: 'ready',
     nextLabel: 'Mark Ready',
   },
   ready: {
     label: 'Ready',
     color: 'text-emerald-700',
+    darkColor: 'dark:text-emerald-300',
     bg: 'bg-emerald-50 border-emerald-200',
+    darkBg: 'dark:bg-emerald-950 dark:border-emerald-800',
     next: 'picked_up',
     nextLabel: 'Picked Up',
   },
   picked_up: {
     label: 'Picked Up',
     color: 'text-slate-600',
+    darkColor: 'dark:text-slate-300',
     bg: 'bg-slate-50 border-slate-200',
+    darkBg: 'dark:bg-slate-800 dark:border-slate-700',
   },
   cancelled: {
     label: 'Cancelled',
     color: 'text-red-600',
+    darkColor: 'dark:text-red-300',
     bg: 'bg-red-50 border-red-200',
+    darkBg: 'dark:bg-red-950 dark:border-red-800',
   },
 };
 
@@ -109,7 +123,7 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
 
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input
@@ -117,7 +131,7 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
             placeholder="Search orders, students, items..."
             value={search}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 pl-9 pr-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:focus:ring-indigo-400"
           />
         </div>
         <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
@@ -125,11 +139,10 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
             <button
               key={s}
               onClick={() => setFilter(s)}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
-                filter === s
+              className={`rounded-full px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${filter === s
                   ? 'bg-indigo-600 text-white'
-                  : 'bg-white text-slate-600 border border-slate-200 hover:border-slate-300'
-              }`}
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                }`}
             >
               {s === 'all' ? 'All' : STATUS_CONFIG[s].label}
               {s !== 'all' && (
@@ -172,14 +185,14 @@ export function OrderQueue({ orders, stats, isLoading, onUpdateStatus, onCancel 
 
 function StatCard({ label, value, color }: { label: string; value: string | number; color: string }) {
   const colorMap: Record<string, string> = {
-    indigo: 'bg-indigo-50 text-indigo-700',
-    amber: 'bg-amber-50 text-amber-700',
-    emerald: 'bg-emerald-50 text-emerald-700',
-    slate: 'bg-slate-50 text-slate-700',
+    indigo: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
+    amber: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    emerald: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+    slate: 'bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
   };
 
   return (
-    <div className={`rounded-xl border border-slate-100 p-3 ${colorMap[color] || 'bg-slate-50'}`}>
+    <div className={`rounded-xl border border-slate-100 dark:border-slate-700 p-3 ${colorMap[color] || 'bg-slate-50'}`}>
       <p className="text-xs font-medium opacity-75 mb-0.5">{label}</p>
       <p className="text-xl font-bold tabular-nums">{value}</p>
     </div>
@@ -199,48 +212,48 @@ function OrderCard({ order, onUpdateStatus, onCancel }: OrderCardProps) {
   const timeAgo = getTimeAgo(order.createdAt);
 
   return (
-    <div className={`rounded-xl border p-4 transition-shadow hover:shadow-sm ${config.bg}`}>
+    <div className={`rounded-xl border p-4 transition-shadow hover:shadow-sm ${config.bg} ${config.darkBg}`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${config.color} bg-white/80`}>
+          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${config.color} ${config.darkColor} bg-white/80 dark:bg-slate-900/80`}>
             {config.label}
           </span>
-          <span className="text-xs text-slate-500 font-medium">{order.id}</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">{order.id}</span>
         </div>
-        <span className="text-[10px] text-slate-400">{timeAgo}</span>
+        <span className="text-[10px] text-slate-400 dark:text-slate-500">{timeAgo}</span>
       </div>
 
       <div className="mb-3">
-        <p className="text-sm font-semibold text-slate-900">{order.studentName}</p>
-        <p className="text-xs text-slate-500">{order.studentEmail}</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{order.studentName}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{order.studentEmail}</p>
       </div>
 
       <div className="space-y-1.5 mb-3">
         {order.items.map((item, idx: number) => (
           <div key={idx} className="flex items-center gap-2 text-sm">
             <span className="text-base">{item.menuItem.emoji}</span>
-            <span className="flex-1 text-slate-700">{item.menuItem.name}</span>
-            <span className="text-xs text-slate-500">×{item.quantity}</span>
-            <span className="text-sm font-medium text-slate-900 tabular-nums">₹{item.subtotal}</span>
+            <span className="flex-1 text-slate-700 dark:text-slate-300">{item.menuItem.name}</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">×{item.quantity}</span>
+            <span className="text-sm font-medium text-slate-900 dark:text-slate-100 tabular-nums">₹{item.subtotal}</span>
           </div>
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-black/5">
-        <div className="flex items-center gap-2 text-xs text-slate-500">
+      <div className="flex items-center justify-between pt-3 border-t border-black/5 dark:border-white/5">
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span>Pickup: {order.timeSlot}</span>
         </div>
-        <span className="text-sm font-bold text-slate-900 tabular-nums">₹{order.total}</span>
+        <span className="text-sm font-bold text-slate-900 dark:text-slate-100 tabular-nums">₹{order.total}</span>
       </div>
 
       <div className="flex gap-2 mt-3">
         {config.next && (
           <button
             onClick={() => onUpdateStatus(order.id, config.next!)}
-            className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+            className="flex-1 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white hover:bg-indigo-700 active:scale-[0.98] transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800"
           >
             {config.nextLabel}
           </button>
@@ -248,7 +261,7 @@ function OrderCard({ order, onUpdateStatus, onCancel }: OrderCardProps) {
         {order.status !== 'picked_up' && order.status !== 'cancelled' && (
           <button
             onClick={() => onCancel(order.id)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+            className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-950 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition-colors"
           >
             Cancel
           </button>

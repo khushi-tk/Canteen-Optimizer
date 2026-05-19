@@ -22,17 +22,55 @@ import { EmptyState, SectionHeader, Skeleton } from '../ui';
 
 interface BadgeCfg {
   bg: string;
+  darkBg: string;
   text: string;
+  darkText: string;
   label: string;
 }
 
 const STATUS_BADGE: Record<OrderStatus, BadgeCfg> = {
-  pending_payment: { bg: 'bg-slate-100', text: 'text-slate-500', label: 'Pending Payment' },
-  confirmed: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Confirmed' },
-  preparing: { bg: 'bg-amber-50', text: 'text-amber-700', label: 'Preparing' },
-  ready: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'Ready! 🔔' },
-  picked_up: { bg: 'bg-slate-50', text: 'text-slate-500', label: 'Picked Up' },
-  cancelled: { bg: 'bg-red-50', text: 'text-red-600', label: 'Cancelled' },
+  pending_payment: {
+    bg: 'bg-slate-100',
+    darkBg: 'dark:bg-slate-800',
+    text: 'text-slate-500',
+    darkText: 'dark:text-slate-400',
+    label: 'Pending Payment'
+  },
+  confirmed: {
+    bg: 'bg-blue-50',
+    darkBg: 'dark:bg-blue-950',
+    text: 'text-blue-700',
+    darkText: 'dark:text-blue-300',
+    label: 'Confirmed'
+  },
+  preparing: {
+    bg: 'bg-amber-50',
+    darkBg: 'dark:bg-amber-950',
+    text: 'text-amber-700',
+    darkText: 'dark:text-amber-300',
+    label: 'Preparing'
+  },
+  ready: {
+    bg: 'bg-emerald-50',
+    darkBg: 'dark:bg-emerald-950',
+    text: 'text-emerald-700',
+    darkText: 'dark:text-emerald-300',
+    label: 'Ready! 🔔'
+  },
+  picked_up: {
+    bg: 'bg-slate-50',
+    darkBg: 'dark:bg-slate-800',
+    text: 'text-slate-500',
+    darkText: 'dark:text-slate-400',
+    label: 'Picked Up'
+  },
+  cancelled: {
+    bg: 'bg-red-50',
+    darkBg: 'dark:bg-red-950',
+    text: 'text-red-600',
+    darkText: 'dark:text-red-300',
+    label: 'Cancelled'
+  },
 };
 
 const ACTIVE_STATUSES: OrderStatus[] = ['confirmed', 'preparing', 'ready'];
@@ -121,14 +159,14 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
   if (isLoading) {
     return (
       <div className="px-5 pt-4">
-        <Skeleton className="h-6 w-40 mb-4" />
+        <Skeleton className="h-6 w-40 mb-4 dark:bg-slate-700" />
         <div className="flex gap-2 mb-4">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-8 w-16 rounded-[999px]" />
+            <Skeleton key={i} className="h-8 w-16 rounded-[999px] dark:bg-slate-700" />
           ))}
         </div>
         {[1, 2, 3].map((i) => (
-          <Skeleton key={i} className="h-36 mb-3 rounded-2xl" />
+          <Skeleton key={i} className="h-36 mb-3 rounded-2xl dark:bg-slate-700" />
         ))}
       </div>
     );
@@ -143,7 +181,7 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
           <button
             onClick={() => void load(true)}
             aria-label="Refresh orders"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-sm transition-all duration-150 hover:bg-slate-200 active:scale-95"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 text-sm text-slate-600 dark:text-slate-300 transition-all duration-150 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95"
           >
             ↻
           </button>
@@ -156,11 +194,10 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`relative rounded-[999px] px-4 py-2 text-xs font-bold transition-all duration-150 active:scale-95 ${
-              tab === t.key
+            className={`relative rounded-[999px] px-4 py-2 text-xs font-bold transition-all duration-150 active:scale-95 ${tab === t.key
                 ? 'bg-brand-500 text-white shadow-md'
-                : 'bg-white text-slate-500 border border-slate-200'
-            }`}
+                : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+              }`}
           >
             {t.label}
             {t.badge !== undefined && tab !== t.key && (
@@ -180,8 +217,8 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
             tab === 'active'
               ? 'No active orders'
               : tab === 'done'
-              ? 'No past orders'
-              : 'No orders yet'
+                ? 'No past orders'
+                : 'No orders yet'
           }
           subtitle="Place an order from the menu to see it here."
         />
@@ -198,15 +235,14 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
             return (
               <div
                 key={order.orderId}
-                className={`rounded-2xl bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] transition-all duration-200 ${
-                  active ? 'ring-2 ring-brand-500 ring-offset-1' : ''
-                }`}
+                className={`rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-[0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-all duration-200 ${active ? 'ring-2 ring-brand-500 ring-offset-1 dark:ring-offset-slate-900' : ''
+                  }`}
               >
                 {/* Live banner */}
                 {active && (
-                  <div className="mb-2 flex items-center gap-1.5 rounded-xl bg-brand-50 px-3 py-1.5">
+                  <div className="mb-2 flex items-center gap-1.5 rounded-xl bg-brand-50 dark:bg-brand-950 px-3 py-1.5">
                     <span className="h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
-                    <span className="text-[10px] font-bold text-brand-600">
+                    <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400">
                       Live order — updating every 15s
                     </span>
                   </div>
@@ -214,18 +250,18 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
 
                 {/* Top row: token + status */}
                 <div className="flex items-center justify-between">
-                  <p className="font-mono text-sm font-black text-slate-800 tracking-wider">
+                  <p className="font-mono text-sm font-black text-slate-800 dark:text-slate-100 tracking-wider">
                     {order.tokenCode}
                   </p>
                   <span
-                    className={`rounded-[999px] px-2.5 py-1 text-[10px] font-bold ${badge.bg} ${badge.text}`}
+                    className={`rounded-[999px] px-2.5 py-1 text-[10px] font-bold ${badge.bg} ${badge.darkBg} ${badge.text} ${badge.darkText}`}
                   >
                     {badge.label}
                   </span>
                 </div>
 
                 {/* Time placed */}
-                <p className="mt-1 text-[10px] text-slate-400 font-semibold">
+                <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
                   Placed at {placedAt}
                 </p>
 
@@ -234,7 +270,7 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
                   {order.items.map((ci) => (
                     <span
                       key={ci.menuItem.id}
-                      className="inline-flex items-center gap-1 rounded-[999px] bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600"
+                      className="inline-flex items-center gap-1 rounded-[999px] bg-slate-50 dark:bg-slate-700 px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:text-slate-300"
                     >
                       {ci.menuItem.emoji} {ci.menuItem.name} ×{ci.quantity}
                     </span>
@@ -242,12 +278,12 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
                 </div>
 
                 {/* Bottom row: slot + total + QR */}
-                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2.5">
-                  <div className="text-[10px] text-slate-400 font-semibold">
+                <div className="mt-3 flex items-center justify-between border-t border-slate-100 dark:border-slate-700 pt-2.5">
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">
                     📅 {order.pickupSlot.label}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-black text-slate-800">
+                    <span className="text-sm font-black text-slate-800 dark:text-slate-100">
                       ₹{order.totalAmount}
                     </span>
                     {active && (
@@ -261,7 +297,7 @@ export function MyOrdersView({ onViewQR, onReorder }: MyOrdersViewProps) {
                     {!active && order.status === 'picked_up' && onReorder && (
                       <button
                         onClick={() => onReorder(order)}
-                        className="rounded-xl border-2 border-indigo-200 bg-indigo-50 px-3 py-1.5 text-[10px] font-bold text-indigo-600 transition-all duration-150 hover:bg-indigo-100 hover:border-indigo-300 active:scale-95"
+                        className="rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950 px-3 py-1.5 text-[10px] font-bold text-indigo-600 dark:text-indigo-300 transition-all duration-150 hover:bg-indigo-100 dark:hover:bg-indigo-900 hover:border-indigo-300 dark:hover:border-indigo-700 active:scale-95"
                       >
                         🔄 Reorder
                       </button>

@@ -18,25 +18,25 @@ interface TimeSlotPickerProps {
 
 function getSlotBaseStyle(spots: number, selected: boolean, disabled: boolean) {
   if (disabled) {
-    return 'border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed opacity-60';
+    return 'border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60';
   }
 
   const selectedRing = selected
-    ? 'ring-2 ring-indigo-500 ring-offset-1 border-indigo-500'
+    ? 'ring-2 ring-indigo-500 ring-offset-1 dark:ring-offset-slate-800 border-indigo-500'
     : '';
 
-  if (selected) return `bg-indigo-50 ${selectedRing}`;
+  if (selected) return `bg-indigo-50 dark:bg-indigo-950 ${selectedRing}`;
 
-  if (spots >= 5) return 'border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-50';
-  if (spots >= 2) return 'border border-amber-200 bg-amber-50/60 hover:bg-amber-50';
-  return 'border border-red-200 bg-red-50/60 hover:bg-red-50';
+  if (spots >= 5) return 'border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/60 hover:bg-emerald-50 dark:hover:bg-emerald-950';
+  if (spots >= 2) return 'border border-amber-200 dark:border-amber-800 bg-amber-50/60 dark:bg-amber-950/60 hover:bg-amber-50 dark:hover:bg-amber-950';
+  return 'border border-red-200 dark:border-red-800 bg-red-50/60 dark:bg-red-950/60 hover:bg-red-50 dark:hover:bg-red-950';
 }
 
 function getSpotsIndicator(spots: number): { color: string; dot: string } {
-  if (spots >= 5) return { color: 'text-emerald-700', dot: 'bg-emerald-500' };
-  if (spots >= 2) return { color: 'text-amber-700', dot: 'bg-amber-500' };
-  if (spots >= 1) return { color: 'text-red-700', dot: 'bg-red-500' };
-  return { color: 'text-slate-400', dot: 'bg-slate-300' };
+  if (spots >= 5) return { color: 'text-emerald-700 dark:text-emerald-300', dot: 'bg-emerald-500' };
+  if (spots >= 2) return { color: 'text-amber-700 dark:text-amber-300', dot: 'bg-amber-500' };
+  if (spots >= 1) return { color: 'text-red-700 dark:text-red-300', dot: 'bg-red-500' };
+  return { color: 'text-slate-400 dark:text-slate-500', dot: 'bg-slate-300 dark:bg-slate-600' };
 }
 
 export function TimeSlotPicker({
@@ -49,7 +49,7 @@ export function TimeSlotPicker({
     return (
       <div className="grid grid-cols-2 gap-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-20 rounded-xl" />
+          <Skeleton key={i} className="h-20 rounded-xl dark:bg-slate-700" />
         ))}
       </div>
     );
@@ -57,9 +57,9 @@ export function TimeSlotPicker({
 
   if (slots.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
-        <p className="text-sm font-medium text-slate-500">No slots available</p>
-        <p className="mt-1 text-xs text-slate-400">Check back soon for new pickup windows</p>
+      <div className="rounded-xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-6 text-center">
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No slots available</p>
+        <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">Check back soon for new pickup windows</p>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export function TimeSlotPicker({
             disabled={disabled}
             onClick={() => onSelect(slot.id)}
             aria-pressed={isSelected}
-            className={`relative flex flex-col items-center rounded-xl px-3 py-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 ${getSlotBaseStyle(
+            className={`relative flex flex-col items-center rounded-xl px-3 py-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800 ${getSlotBaseStyle(
               slot.spotsRemaining,
               isSelected,
               disabled,
@@ -92,10 +92,10 @@ export function TimeSlotPicker({
               </span>
             )}
 
-            <span className={`text-sm font-semibold ${disabled ? 'text-slate-400' : 'text-slate-900'}`}>
+            <span className={`text-sm font-semibold ${disabled ? 'text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-slate-100'}`}>
               {slot.startTime}
             </span>
-            <span className="text-[10px] text-slate-500 font-medium">
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
               to {slot.endTime}
             </span>
 
