@@ -43,7 +43,7 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-[390px] border-t border-slate-100 bg-white/90 backdrop-blur-md"
+      className="fixed bottom-0 left-0 right-0 z-50 mx-auto w-full max-w-[390px] border-t border-slate-100 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex">
@@ -54,9 +54,8 @@ export function BottomNav({
               key={tab.view}
               onClick={() => onNavigate(tab.view)}
               aria-label={`Navigate to ${tab.label}`}
-              className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 transition-all duration-150 active:scale-95 ${
-                isActive ? 'text-brand-500' : 'text-slate-400'
-              }`}
+              className={`relative flex flex-1 flex-col items-center gap-0.5 py-2.5 transition-all duration-150 active:scale-95 ${isActive ? 'text-brand-500 dark:text-brand-400' : 'text-slate-400 dark:text-slate-500'
+                }`}
               style={{ minHeight: 44 }}
             >
               <div className="relative">
@@ -71,7 +70,7 @@ export function BottomNav({
               <span className="text-[10px] font-bold">{tab.label}</span>
               {/* Active dot */}
               {isActive && (
-                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-brand-500" />
+                <span className="absolute bottom-1 h-1 w-1 rounded-full bg-brand-500 dark:bg-brand-400" />
               )}
             </button>
           );

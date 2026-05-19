@@ -49,16 +49,16 @@ export function CartDrawer({
             'height 300ms cubic-bezier(0.4, 0, 0.2, 1), bottom 300ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
-        <div className="flex h-full flex-col rounded-t-2xl border-t border-slate-100 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+        <div className="flex h-full flex-col rounded-t-2xl border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] dark:shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
           {/* Header */}
           <button
             onClick={() => setExpanded((e) => !e)}
-            className="flex w-full flex-col items-center px-5 pt-3 pb-2 transition-colors active:bg-slate-50"
+            className="flex w-full flex-col items-center px-5 pt-3 pb-2 transition-colors active:bg-slate-50 dark:active:bg-slate-700"
             aria-label={
               expanded ? 'Collapse cart' : 'Expand cart'
             }
           >
-            <div className="mb-3 h-1 w-10 rounded-full bg-slate-300" />
+            <div className="mb-3 h-1 w-10 rounded-full bg-slate-300 dark:bg-slate-600" />
 
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center gap-2">
@@ -71,12 +71,12 @@ export function CartDrawer({
                 </div>
 
                 <div className="text-left">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                     {cartCount} item
                     {cartCount > 1 ? 's' : ''} in cart
                   </p>
 
-                  <p className="text-[10px] font-medium text-slate-400">
+                  <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
                     {expanded
                       ? 'Tap to collapse'
                       : 'Tap to review'}
@@ -84,7 +84,7 @@ export function CartDrawer({
                 </div>
               </div>
 
-              <p className="text-base font-bold tabular-nums text-slate-900">
+              <p className="text-base font-bold tabular-nums text-slate-900 dark:text-slate-100">
                 ₹{cartTotal}
               </p>
             </div>
@@ -97,18 +97,18 @@ export function CartDrawer({
               {cart.map((ci) => (
                 <div
                   key={ci.menuItem.id}
-                  className="flex items-center gap-3 border-b border-slate-100 py-3 last:border-0"
+                  className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-700 py-3 last:border-0"
                 >
                   <span className="select-none text-2xl">
                     {ci.menuItem.emoji}
                   </span>
 
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-slate-900">
+                    <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
                       {ci.menuItem.name}
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-400 dark:text-slate-500">
                       ₹{ci.menuItem.price} each
                     </p>
                   </div>
@@ -120,12 +120,12 @@ export function CartDrawer({
                       onClick={() =>
                         onUpdateQty(ci.menuItem.id, -1)
                       }
-                      className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-600 transition-all duration-150 hover:bg-slate-200 active:scale-95"
+                      className="flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 font-bold text-slate-600 dark:text-slate-300 transition-all duration-150 hover:bg-slate-200 dark:hover:bg-slate-600 active:scale-95"
                     >
                       −
                     </button>
 
-                    <span className="w-5 text-center text-sm font-black text-slate-800">
+                    <span className="w-5 text-center text-sm font-black text-slate-800 dark:text-slate-200">
                       {ci.quantity}
                     </span>
 
@@ -140,7 +140,7 @@ export function CartDrawer({
                     </button>
                   </div>
 
-                  <p className="w-12 text-right text-sm font-extrabold text-slate-800">
+                  <p className="w-12 text-right text-sm font-extrabold text-slate-800 dark:text-slate-200">
                     ₹
                     {ci.menuItem.price * ci.quantity}
                   </p>
@@ -148,12 +148,12 @@ export function CartDrawer({
               ))}
 
               {/* Total */}
-              <div className="mt-3 flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                <span className="text-sm font-semibold text-slate-600">
+              <div className="mt-3 flex items-center justify-between rounded-2xl bg-slate-50 dark:bg-slate-700 px-4 py-3">
+                <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">
                   Total
                 </span>
 
-                <span className="text-lg font-bold tabular-nums text-slate-900">
+                <span className="text-lg font-bold tabular-nums text-slate-900 dark:text-slate-100">
                   ₹{cartTotal}
                 </span>
               </div>
@@ -171,7 +171,7 @@ export function CartDrawer({
                   onCheckout();
                 }
               }}
-              className="w-full rounded-2xl bg-indigo-600 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+              className="w-full rounded-2xl bg-indigo-600 py-3.5 text-center text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-indigo-700 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-800"
             >
               {!expanded
                 ? `Review & Checkout — ₹${cartTotal} →`

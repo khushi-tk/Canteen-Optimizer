@@ -11,6 +11,7 @@ import { useState, useCallback } from 'react';
 import type { AppView, OrderToken, TimeSlot } from './types';
 
 import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
 import { useMenu } from './hooks/useMenu';
 import { useCart } from './hooks/useCart';
 import { useOrder } from './hooks/useOrder';
@@ -66,6 +67,7 @@ const DEMO_SLOTS: TimeSlot[] = [
 
 export default function App() {
   const { isAuthenticated, isAdmin, isLoading, user } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const { items: menuItems, isLoading: menuLoading } = useMenu();
 
@@ -130,8 +132,7 @@ export default function App() {
       if (result.unavailable.length > 0) {
         toast.warning(
           `Added ${result.added} item${result.added > 1 ? 's' : ''} to cart`,
-          `${result.unavailable.join(', ')} ${
-            result.unavailable.length > 1 ? 'are' : 'is'
+          `${result.unavailable.join(', ')} ${result.unavailable.length > 1 ? 'are' : 'is'
           } no longer available.`,
         );
       } else {
@@ -188,7 +189,7 @@ export default function App() {
   /* ── Loading ───────────────────────────────────────────── */
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-900">
         <Spinner size="lg" />
       </div>
     );
@@ -206,7 +207,27 @@ export default function App() {
 
   /* ── Student Route ────────────────────────────────────── */
   return (
-    <div className="mx-auto min-h-screen max-w-[390px] bg-slate-50">
+    <div className="mx-auto min-h-screen max-w-[390px] bg-slate-50 dark:bg-slate-900">
+
+      {/* Theme Toggle — fixed top-right */}
+      <button
+        onClick={toggleTheme}
+        aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-md ring-1 ring-slate-200 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:ring-slate-700 dark:hover:bg-slate-700"
+      >
+        {isDark ? (
+          /* Sun icon */
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm0 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm10-7a1 1 0 010 2h-1a1 1 0 110-2h1zM3 11a1 1 0 010 2H2a1 1 0 110-2h1zm15.364-6.364a1 1 0 010 1.414l-.707.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM7.757 16.243a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zm9.9 1.414a1 1 0 01-1.414 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM7.757 7.757a1 1 0 01-1.414 0l-.707-.707A1 1 0 017.05 5.636l.707.707a1 1 0 010 1.414zM12 7a5 5 0 100 10A5 5 0 0012 7z" />
+          </svg>
+        ) : (
+          /* Moon icon */
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-700" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z" />
+          </svg>
+        )}
+      </button>
+
       {/* Checkout */}
       {view === 'checkout' && (
         <CheckoutSummary

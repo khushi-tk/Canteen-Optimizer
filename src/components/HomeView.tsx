@@ -41,11 +41,11 @@ export function HomeView({
       {/* Header */}
       <div className="flex items-start justify-between px-5 pt-5 pb-3">
         <div>
-          <p className="text-xs font-bold text-brand-500 uppercase tracking-wider">
+          <p className="text-xs font-bold text-brand-500 uppercase tracking-wider dark:text-brand-400">
             Heritage Institute of Technology
           </p>
 
-          <h1 className="text-xl font-black text-slate-800 mt-0.5">
+          <h1 className="text-xl font-black text-slate-800 dark:text-slate-100 mt-0.5">
             🍽️ Smart Canteen
           </h1>
         </div>
@@ -54,7 +54,7 @@ export function HomeView({
         <button
           type="button"
           onClick={logout}
-          className="rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600"
+          className="rounded-lg bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
         >
           Logout
         </button>

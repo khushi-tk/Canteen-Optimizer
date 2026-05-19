@@ -4,7 +4,7 @@
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './hooks/useToast';
 
@@ -15,9 +15,11 @@ import './index.css';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>
-      <ToastProvider>
-        <App />
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <App />
+        </ToastProvider>
+      </ThemeProvider>
     </AuthProvider>
   </StrictMode>,
 );
