@@ -1,30 +1,57 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+/**
+ * context/AuthContext.tsx
+ *
+ * Provides real Supabase authentication (email / password).
+ * Stores name & role in Supabase user_metadata so the rest
+ * of the app can use the same User type it always has.
+ */
+
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
 import type { ReactNode } from 'react';
-import type { User, LoginCredentials, AuthState } from '../types';
+import type { User, LoginCredentials, SignupCredentials, AuthState, UserRole } from '../types';
+import { supabase } from '../services/supabaseClient';
 
-const STORAGE_KEY = 'canteen_auth';
+import type { Session } from '@supabase/supabase-js';
 
-const MOCK_USERS: Record<string, { password: string; user: User }> = {
-  'student@college.edu': {
-    password: 'student123',
-    user: { id: 'stu_1', email: 'student@college.edu', name: 'Alex Johnson', role: 'student' },
-  },
-  'admin@canteen.edu': {
-    password: 'admin123',
-    user: { id: 'adm_1', email: 'admin@canteen.edu', name: 'Manager Sarah', role: 'admin' },
-  },
-};
+/* ── Helpers ─────────────────────────────────────────────── */
+
+/** Map a Supabase session to our app User. */
+function sessionToUser(session: Session | null): User | null {
+  if (!session?.user) return null;
+
+  const u = session.user;
+  const meta = u.user_metadata ?? {};
+
+  return {
+    id: u.id,
+    email: u.email ?? '',
+    name: (meta.name as string) ?? u.email ?? '',
+    role: ((meta.role as string) ?? 'student') as UserRole,
+    avatar: (meta.avatar_url as string) ?? undefined,
+  };
+}
+
+/* ── Context value shape ─────────────────────────────────── */
 
 interface AuthContextValue extends AuthState {
   isAuthenticated: boolean;
   isStudent: boolean;
   isAdmin: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
+  signup: (credentials: SignupCredentials) => Promise<boolean>;
   logout: () => void;
   clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
+
+/* ── Provider ────────────────────────────────────────────── */
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -33,41 +60,84 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error: null,
   });
 
+  /* Hydrate session on mount + listen for auth changes */
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const user = JSON.parse(stored) as User;
-        setState({ user, isLoading: false, error: null });
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-        setState((s) => ({ ...s, isLoading: false }));
-      }
-    } else {
-      setState((s) => ({ ...s, isLoading: false }));
-    }
+    // 1. Read the current session from local storage / cookie
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setState({
+        user: sessionToUser(session),
+        isLoading: false,
+        error: null,
+      });
+    });
+
+    // 2. Subscribe to auth state changes (login, logout, token refresh, tab sync)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setState((prev) => ({
+        ...prev,
+        user: sessionToUser(session),
+        isLoading: false,
+      }));
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
+  /* ── Login ──────────────────────────────────────────────── */
   const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
     setState((s) => ({ ...s, isLoading: true, error: null }));
-    await new Promise((r) => setTimeout(r, 800));
 
-    const mock = MOCK_USERS[credentials.email.toLowerCase()];
-    if (!mock || mock.password !== credentials.password) {
-      setState({ user: null, isLoading: false, error: 'Invalid email or password' });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: credentials.email,
+      password: credentials.password,
+    });
+
+    if (error) {
+      setState({ user: null, isLoading: false, error: error.message });
       return false;
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mock.user));
-    setState({ user: mock.user, isLoading: false, error: null });
+    // onAuthStateChange will update the user
     return true;
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+  /* ── Sign Up ────────────────────────────────────────────── */
+  const signup = useCallback(async (credentials: SignupCredentials): Promise<boolean> => {
+    setState((s) => ({ ...s, isLoading: true, error: null }));
+
+    const { error } = await supabase.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+      options: {
+        data: {
+          name: credentials.name,
+          role: credentials.role,
+        },
+      },
+    });
+
+    if (error) {
+      setState({ user: null, isLoading: false, error: error.message });
+      return false;
+    }
+
+    // If email confirmation is OFF the session fires immediately via onAuthStateChange.
+    // If it's ON the user will see a "check your inbox" message in the UI.
+    setState((s) => ({ ...s, isLoading: false }));
+    return true;
+  }, []);
+
+  /* ── Logout ─────────────────────────────────────────────── */
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     setState({ user: null, isLoading: false, error: null });
   }, []);
 
+  /* ── Clear Error ────────────────────────────────────────── */
   const clearError = useCallback(() => {
     setState((s) => ({ ...s, error: null }));
   }, []);
@@ -79,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isStudent: state.user?.role === 'student',
       isAdmin: state.user?.role === 'admin',
       login,
+      signup,
       logout,
       clearError,
     }}>

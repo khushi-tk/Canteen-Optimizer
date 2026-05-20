@@ -2,8 +2,8 @@
  * services/supabaseClient.ts
  *
  * Initializes and exports the Supabase client singleton.
- * When env vars are missing the export is null so the app
- * can fall back to mock data gracefully.
+ * Throws at startup when env vars are missing so auth
+ * and data calls never silently degrade to mock mode.
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
@@ -11,12 +11,14 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
-export const supabase: SupabaseClient | null =
-  url && key ? createClient(url, key) : null;
-
-if (!supabase) {
-  console.warn(
-    '[CanteenCrowd] Supabase credentials missing — running in mock-only mode.\n' +
-      'Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env to enable the backend.',
+if (!url || !key) {
+  throw new Error(
+    '[CanteenCrowd] Missing Supabase credentials.\n' +
+      'Create a .env file at the project root with:\n' +
+      '  VITE_SUPABASE_URL=https://your-project.supabase.co\n' +
+      '  VITE_SUPABASE_ANON_KEY=your-anon-key\n' +
+      'Get these from Supabase Dashboard → Settings → API.',
   );
 }
+
+export const supabase: SupabaseClient = createClient(url, key);

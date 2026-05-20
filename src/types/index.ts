@@ -74,6 +74,11 @@ export interface LoginCredentials {
   password: string;
 }
 
+export interface SignupCredentials extends LoginCredentials {
+  name: string;
+  role: UserRole;
+}
+
 export interface AuthState {
   user: User | null;
   isLoading: boolean;

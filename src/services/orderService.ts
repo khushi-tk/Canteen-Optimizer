@@ -40,28 +40,6 @@ interface OrderRow {
   updated_at: string;
 }
 
-/* ── Mock persistence helpers ─────────────────────────────── */
-
-const MOCK_ORDERS_KEY = 'canteen_orders_mock';
-const MOCK_ORDERS_EVENT = 'canteen-orders-change';
-
-function loadMockRows(): OrderRow[] {
-  const raw = localStorage.getItem(MOCK_ORDERS_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw) as OrderRow[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveMockRows(rows: OrderRow[]): void {
-  localStorage.setItem(MOCK_ORDERS_KEY, JSON.stringify(rows));
-  window.dispatchEvent(new StorageEvent('storage', { key: MOCK_ORDERS_KEY }));
-  window.dispatchEvent(new CustomEvent(MOCK_ORDERS_EVENT));
-}
-
 /* ── Row → Client Converters ──────────────────────────────── */
 
 function rowToOrderToken(row: OrderRow): OrderToken {
@@ -103,7 +81,7 @@ function rowToAdminOrder(row: OrderRow): Order {
 
 /* ── Public API ───────────────────────────────────────────── */
 
-/** Insert a new order into the database (or localStorage in mock mode). */
+/** Insert a new order into the database. */
 export async function createOrder(data: {
   id: string;
   studentId: string;
@@ -142,48 +120,33 @@ export async function createOrder(data: {
     updated_at: new Date().toISOString(),
   };
 
-  if (supabase) {
-    const { error } = await supabase.from('orders').insert(row);
-    if (error) throw error;
-  } else {
-    const rows = loadMockRows();
-    rows.unshift(row);
-    saveMockRows(rows);
-  }
+  const { error } = await supabase.from('orders').insert(row);
+  if (error) throw error;
 }
 
 /** Fetch all orders placed by a specific student. */
 export async function fetchStudentOrders(
   studentId: string,
 ): Promise<OrderToken[]> {
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return (data as OrderRow[]).map(rowToOrderToken);
-  }
-
-  const rows = loadMockRows().filter((r) => r.student_id === studentId);
-  return rows.map(rowToOrderToken);
+  if (error) throw error;
+  return (data as OrderRow[]).map(rowToOrderToken);
 }
 
 /** Fetch every order (admin view). */
 export async function fetchAllOrders(): Promise<Order[]> {
-  if (supabase) {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return (data as OrderRow[]).map(rowToAdminOrder);
-  }
-
-  return loadMockRows().map(rowToAdminOrder);
+  if (error) throw error;
+  return (data as OrderRow[]).map(rowToAdminOrder);
 }
 
 /** Update an order's status. */
@@ -191,61 +154,34 @@ export async function updateOrderStatus(
   orderId: string,
   newStatus: OrderStatus,
 ): Promise<void> {
-  if (supabase) {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', orderId);
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: newStatus, updated_at: new Date().toISOString() })
+    .eq('id', orderId);
 
-    if (error) throw error;
-    return;
-  }
-
-  const rows = loadMockRows();
-  const idx = rows.findIndex((r) => r.id === orderId);
-  if (idx !== -1) {
-    rows[idx].status = newStatus;
-    rows[idx].updated_at = new Date().toISOString();
-    saveMockRows(rows);
-  }
+  if (error) throw error;
 }
 
 /**
  * Subscribe to all changes on the orders table.
  * Returns an unsubscribe function.
  *
- * Works with Supabase Realtime OR localStorage mock bridge.
+ * Uses Supabase Realtime (postgres_changes).
  */
 export function subscribeToOrders(onUpdate: () => void): () => void {
-  if (supabase) {
-    const channelName = `orders-rt-${Math.random().toString(36).slice(2, 9)}`;
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        () => {
-          onUpdate();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase!.removeChannel(channel);
-    };
-  }
-
-  // Mock mode: listen to both cross-tab (storage) and same-tab (custom) events
-  const onStorage = (e: StorageEvent) => {
-    if (e.key === MOCK_ORDERS_KEY) onUpdate();
-  };
-  const onCustom = () => onUpdate();
-
-  window.addEventListener('storage', onStorage);
-  window.addEventListener(MOCK_ORDERS_EVENT, onCustom);
+  const channelName = `orders-rt-${Math.random().toString(36).slice(2, 9)}`;
+  const channel = supabase
+    .channel(channelName)
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'orders' },
+      () => {
+        onUpdate();
+      },
+    )
+    .subscribe();
 
   return () => {
-    window.removeEventListener('storage', onStorage);
-    window.removeEventListener(MOCK_ORDERS_EVENT, onCustom);
+    supabase.removeChannel(channel);
   };
 }

@@ -1,30 +1,45 @@
 /**
  * pages/LoginPage.tsx
+ *
+ * Combined Sign In / Sign Up page backed by Supabase Auth.
  */
 
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Spinner, ErrorBanner } from '../components/ui';
+import type { UserRole } from '../types';
+
+type AuthMode = 'signin' | 'signup';
 
 export function LoginPage() {
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, signup, isLoading, error, clearError } = useAuth();
+
+  const [mode, setMode] = useState<AuthMode>('signin');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [role, setRole] = useState<UserRole>('student');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
+
+  const switchMode = (m: AuthMode) => {
+    setMode(m);
+    clearError();
+    setSignupSuccess(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     clearError();
-    await login({ email, password });
-  };
+    setSignupSuccess(false);
 
-  const quickFill = (role: 'student' | 'admin') => {
-    if (role === 'student') {
-      setEmail('student@college.edu');
-      setPassword('student123');
+    if (mode === 'signin') {
+      await login({ email, password });
     } else {
-      setEmail('admin@canteen.edu');
-      setPassword('admin123');
+      const success = await signup({ email, password, name, role });
+      if (success) {
+        setSignupSuccess(true);
+      }
     }
   };
 
@@ -62,7 +77,40 @@ export function LoginPage() {
             <p className="mt-1 text-sm text-white/90 font-medium drop-shadow-md">College Dining Management</p>
           </div>
 
-          <h2 className="text-base font-semibold text-white mb-4 drop-shadow-md">Sign In</h2>
+          {/* Sign In / Sign Up Toggle */}
+          <div className="mb-5 flex rounded-lg bg-white/10 backdrop-blur-sm p-1 border border-white/15">
+            <button
+              type="button"
+              onClick={() => switchMode('signin')}
+              className={`flex-1 rounded-md py-2 text-sm font-semibold transition-all duration-200 ${
+                mode === 'signin'
+                  ? 'bg-indigo-600/90 text-white shadow-md'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => switchMode('signup')}
+              className={`flex-1 rounded-md py-2 text-sm font-semibold transition-all duration-200 ${
+                mode === 'signup'
+                  ? 'bg-indigo-600/90 text-white shadow-md'
+                  : 'text-white/70 hover:text-white'
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
+
+          {/* Success banner after sign-up */}
+          {signupSuccess && (
+            <div className="mb-4 rounded-lg bg-emerald-500/20 border border-emerald-400/30 backdrop-blur-sm px-4 py-3">
+              <p className="text-sm font-medium text-emerald-200">
+                ✓ Account created! Check your email to verify, then sign in.
+              </p>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4">
@@ -71,6 +119,25 @@ export function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Name field — sign-up only */}
+            {mode === 'signup' && (
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-white/90 mb-1 drop-shadow-sm">
+                  Full Name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                  className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-3 py-2 text-sm text-white placeholder:text-white/50 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
+                />
+              </div>
+            )}
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-1 drop-shadow-sm">
                 Email
@@ -98,6 +165,7 @@ export function LoginPage() {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  minLength={6}
                   className="w-full rounded-lg border border-white/20 bg-white/10 backdrop-blur-md px-3 py-2 pr-10 text-sm text-white placeholder:text-white/50 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 transition-colors"
                 />
                 <button
@@ -120,6 +188,39 @@ export function LoginPage() {
               </div>
             </div>
 
+            {/* Role selector — sign-up only */}
+            {mode === 'signup' && (
+              <div>
+                <label className="block text-sm font-medium text-white/90 mb-2 drop-shadow-sm">
+                  I am a…
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRole('student')}
+                    className={`flex-1 rounded-lg border py-2.5 text-sm font-semibold transition-all duration-200 ${
+                      role === 'student'
+                        ? 'border-indigo-400 bg-indigo-500/30 text-white shadow-md shadow-indigo-500/20'
+                        : 'border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    🎓 Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('admin')}
+                    className={`flex-1 rounded-lg border py-2.5 text-sm font-semibold transition-all duration-200 ${
+                      role === 'admin'
+                        ? 'border-indigo-400 bg-indigo-500/30 text-white shadow-md shadow-indigo-500/20'
+                        : 'border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                    }`}
+                  >
+                    🛡️ Admin
+                  </button>
+                </div>
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={isLoading}
@@ -128,33 +229,20 @@ export function LoginPage() {
               {isLoading ? (
                 <>
                   <Spinner size="sm" variant="neutral" />
-                  <span>Signing in…</span>
+                  <span>{mode === 'signin' ? 'Signing in…' : 'Creating account…'}</span>
                 </>
               ) : (
-                'Sign In'
+                mode === 'signin' ? 'Sign In' : 'Create Account'
               )}
             </button>
           </form>
 
-          <div className="mt-6 pt-4 border-t border-white/20">
-            <p className="text-xs font-semibold text-white/70 mb-2 drop-shadow-sm">Demo Accounts</p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => quickFill('student')}
-                className="flex-1 rounded-md bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-colors"
-              >
-                Student
-              </button>
-              <button
-                type="button"
-                onClick={() => quickFill('admin')}
-                className="flex-1 rounded-md bg-white/10 backdrop-blur-sm px-3 py-1.5 text-xs font-bold text-white border border-white/20 hover:bg-white/20 transition-colors"
-              >
-                Admin
-              </button>
-            </div>
-          </div>
+          {/* Helpful hint */}
+          <p className="mt-6 text-center text-xs text-white/50">
+            {mode === 'signin'
+              ? "Don't have an account? Switch to Sign Up above."
+              : 'Already registered? Switch to Sign In above.'}
+          </p>
 
           <p className="mt-8 text-center text-[10px] uppercase tracking-widest font-bold text-white/60 drop-shadow-sm">
             © {new Date().getFullYear()} College Canteen Services
