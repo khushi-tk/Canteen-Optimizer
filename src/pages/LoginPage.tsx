@@ -20,26 +20,27 @@ export function LoginPage() {
   const [name, setName] = useState<string>('');
   const [role, setRole] = useState<UserRole>('student');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
+  //const [signupSuccess, setSignupSuccess] = useState<boolean>(false);
 
   const switchMode = (m: AuthMode) => {
     setMode(m);
     clearError();
-    setSignupSuccess(false);
+    //setSignupSuccess(false);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     clearError();
-    setSignupSuccess(false);
+    //setSignupSuccess(false);
 
     if (mode === 'signin') {
       await login({ email, password });
     } else {
-      const success = await signup({ email, password, name, role });
-      if (success) {
-        setSignupSuccess(true);
-      }
+      //const success = 
+      await signup({ email, password, name, role });
+      //if (success) {
+        //setSignupSuccess(true);
+      //}
     }
   };
 
@@ -104,13 +105,13 @@ export function LoginPage() {
           </div>
 
           {/* Success banner after sign-up */}
-          {signupSuccess && (
+          {/* {signupSuccess && (
             <div className="mb-4 rounded-lg bg-emerald-500/20 border border-emerald-400/30 backdrop-blur-sm px-4 py-3">
               <p className="text-sm font-medium text-emerald-200">
                 ✓ Account created! Check your email to verify, then sign in.
               </p>
             </div>
-          )}
+          )} */}
 
           {error && (
             <div className="mb-4">
