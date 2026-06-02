@@ -62,14 +62,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   /* Hydrate session on mount + listen for auth changes */
   useEffect(() => {
-    // 1. Read the current session from local storage / cookie
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setState({
-        user: sessionToUser(session),
-        isLoading: false,
-        error: null,
+    // Safety timeout — if Supabase doesn't respond within 10s, stop loading
+    // and show the login page so the user isn't stuck forever.
+    const timeout = setTimeout(() => {
+      setState((prev) => {
+        if (prev.isLoading) {
+          console.warn('[Auth] Supabase session check timed out — showing login.');
+          return { user: null, isLoading: false, error: null };
+        }
+        return prev;
       });
-    });
+    }, 10_000);
+
+    // 1. Read the current session from local storage / cookie
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        clearTimeout(timeout);
+        setState({
+          user: sessionToUser(session),
+          isLoading: false,
+          error: null,
+        });
+      })
+      .catch((err) => {
+        clearTimeout(timeout);
+        console.error('[Auth] Failed to get session:', err);
+        setState({ user: null, isLoading: false, error: null });
+      });
 
     // 2. Subscribe to auth state changes (login, logout, token refresh, tab sync)
     const {
@@ -83,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => {
+      clearTimeout(timeout);
       subscription.unsubscribe();
     };
   }, []);
