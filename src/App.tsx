@@ -207,7 +207,7 @@ export default function App() {
 
   /* ── Student Route ────────────────────────────────────── */
   return (
-    <div className="mx-auto min-h-screen max-w-[390px] bg-slate-50 dark:bg-slate-900">
+    <div className="mx-auto min-h-screen max-w-[390px] sm:max-w-none bg-slate-50 dark:bg-slate-900">
 
       {/* Theme Toggle — fixed top-right */}
       <button

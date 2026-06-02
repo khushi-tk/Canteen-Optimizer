@@ -57,14 +57,14 @@ export function LoginPage() {
         On desktop it shows as a centered phone-sized card.
       */}
       <div
-        className="relative w-[390px] h-[844px] max-w-full max-h-[100dvh] overflow-hidden bg-cover bg-center bg-no-repeat"
+        className="relative w-[390px] sm:w-full h-[844px] sm:h-auto max-w-full max-h-[100dvh] sm:max-h-none sm:min-h-screen overflow-hidden sm:overflow-y-auto bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/login-bg.jpg')" }}
       >
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/45" />
 
         {/* Scrollable content */}
-        <div className="relative z-10 flex flex-col justify-center h-full px-8 overflow-y-auto">
+        <div className="relative z-10 flex flex-col justify-center h-full px-8 overflow-y-auto sm:max-w-md sm:mx-auto">
 
           {/* Logo + branding */}
           <div className="mb-8 text-center">

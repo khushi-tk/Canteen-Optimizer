@@ -122,7 +122,7 @@ export function CheckoutSummary({
       </div>
 
       {/* Fixed bottom CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 mx-auto w-full max-w-[390px] border-t border-slate-100 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 px-5 pb-6 pt-3 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 z-20 mx-auto w-full max-w-[390px] sm:max-w-none border-t border-slate-100 dark:border-slate-700 bg-white/95 dark:bg-slate-800/95 px-5 pb-6 pt-3 backdrop-blur-md">
         {!selectedSlotId && (
           <p className="mb-2 text-center text-xs font-medium text-slate-400 dark:text-slate-500">
             Select a pickup slot to continue

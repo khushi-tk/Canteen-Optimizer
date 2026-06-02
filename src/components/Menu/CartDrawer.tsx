@@ -41,7 +41,7 @@ export function CartDrawer({
 
       {/* Drawer */}
       <div
-        className="fixed left-0 right-0 z-[55] mx-auto w-full max-w-[390px]"
+        className="fixed left-0 right-0 z-[55] mx-auto w-full max-w-[390px] sm:max-w-none"
         style={{
           bottom: expanded ? 0 : 56,
           height: expanded ? '70vh' : 80,

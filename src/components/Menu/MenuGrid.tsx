@@ -193,7 +193,7 @@ export function MenuGrid({ items, isLoading, cart, onAdd, onUpdateQty }: MenuGri
             <Skeleton key={i} className="h-9 w-20 flex-shrink-0 rounded-full dark:bg-slate-700" />
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-44 rounded-xl dark:bg-slate-700" />
           ))}
@@ -274,7 +274,7 @@ export function MenuGrid({ items, isLoading, cart, onAdd, onUpdateQty }: MenuGri
           subtitle="Try adjusting your filters or search term."
         />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {filtered.map((item) => (
             <MenuItemCard
               key={item.id}
